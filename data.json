@@ -22,13 +22,13 @@
       "id": 1793539585595,
       "key": "pass_xcq53jp",
       "note": "Баатархүү",
-      "lockedDeviceId": null,
-      "deviceInfo": null,
+      "lockedDeviceId": "DEV_PHONE_1",
+      "deviceInfo": "iPhone",
       "isActive": true,
       "access": {
         "movie_1793539149178": {
           "days": 30,
-          "expiresAt": null
+          "expiresAt": "2026-12-01T13:35:07.060Z"
         }
       }
     }
