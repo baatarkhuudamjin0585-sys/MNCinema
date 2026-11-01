@@ -37,7 +37,7 @@
             position: sticky;
             top: 0;
             z-index: 100;
-            background: rgba(11, 14, 20, 0.85);
+            background: rgba(11, 14, 20, 0.9);
             backdrop-filter: blur(16px);
             border-bottom: 1px solid var(--border);
             padding: 14px 20px;
@@ -126,8 +126,8 @@
 
         .movie-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+            gap: 22px;
             margin-top: 20px;
         }
 
@@ -147,6 +147,15 @@
             box-shadow: 0 12px 24px rgba(0,0,0,0.6);
         }
 
+        .movie-card.locked-card {
+            opacity: 0.7;
+            filter: grayscale(30%);
+        }
+
+        .movie-card.locked-card:hover {
+            border-color: #64748B;
+        }
+
         .poster-wrap {
             aspect-ratio: 2/3;
             width: 100%;
@@ -161,7 +170,7 @@
             position: absolute;
             bottom: 8px;
             right: 8px;
-            background: rgba(0,0,0,0.75);
+            background: rgba(0,0,0,0.8);
             backdrop-filter: blur(4px);
             font-size: 0.75rem;
             font-weight: 600;
@@ -169,9 +178,32 @@
             border-radius: 4px;
         }
 
-        .movie-info { padding: 12px 14px; }
-        .movie-title { font-weight: 700; font-size: 0.95rem; margin-bottom: 4px; }
-        .movie-cat { color: var(--text-sub); font-size: 0.75rem; }
+        .access-badge {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: 6px;
+            backdrop-filter: blur(4px);
+        }
+
+        .badge-unlocked {
+            background: rgba(34, 197, 94, 0.9);
+            color: #fff;
+        }
+
+        .badge-locked-overlay {
+            background: rgba(15, 23, 42, 0.85);
+            color: #94A3B8;
+            border: 1px solid #334155;
+        }
+
+        .movie-info { padding: 14px; }
+        .movie-title { font-weight: 700; font-size: 1rem; margin-bottom: 4px; line-height: 1.3; }
+        .movie-cat { color: var(--text-sub); font-size: 0.8rem; margin-bottom: 6px; }
+        .movie-time-left { font-size: 0.78rem; font-weight: 600; }
 
         #player-view {
             display: none;
@@ -229,6 +261,41 @@
         .badge-status { display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }
         .badge-active { background: rgba(34, 197, 94, 0.2); color: #4ade80; }
         .badge-locked { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+
+        .tag-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: #1E293B;
+            border: 1px solid #334155;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            margin: 2px;
+        }
+
+        /* MODAL */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(8px);
+            z-index: 300;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            max-width: 500px;
+            width: 100%;
+            padding: 24px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.7);
+        }
     </style>
 </head>
 <body>
@@ -245,10 +312,10 @@
     </header>
 
     <div class="container">
-        <!-- НЭВТРЭХ ХЭСЭГ -->
+        <!-- НЭВТРЭХ ХЭСЭГ (ЗӨВХӨН АДМИН ЭСВЭЛ ЛИНКГҮЙ ИРСЭН ХҮМҮҮСТ) -->
         <div id="auth-view">
             <div class="auth-title">Тавтай морил</div>
-            <div class="auth-sub">Админ эсвэл хэрэглэгчийн нууц үгээ оруулан нэвтэрнэ үү.</div>
+            <div class="auth-sub">MN Cinema удирдлагын хэсэг</div>
             
             <form onsubmit="handleLogin(event)">
                 <div class="form-group">
@@ -262,14 +329,17 @@
                 <button type="submit" class="btn-primary" style="width: 100%; margin-top: 8px;">Нэвтрэх</button>
             </form>
             <p style="font-size: 0.75rem; color: var(--text-sub); text-align: center; margin-top: 16px;">
-                ⚠️ Нэг линк зөвхөн 1 төхөөрөмжөөс үзэх хамгаалалттай.
+                💡 Үзэгчид линкээр шууд орж үзнэ. Энд зөвхөн админ нэвтэрнэ.
             </p>
         </div>
 
-        <!-- ҮНДСЭН КИНО ХАРАХ ХЭСЭГ -->
+        <!-- ҮНДСЭН КИНО САН ХАРАХ ХЭСЭГ (ХЭРЭГЛЭГЧ & АДМИН) -->
         <div id="main-view" style="display: none;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h2 style="font-size: 1.3rem;">✨ Кино, Анимэ сан</h2>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
+                <div>
+                    <h2 style="font-size: 1.4rem;" id="catalog-title">✨ Кино сан</h2>
+                    <p style="font-size: 0.85rem; color: var(--text-sub);" id="catalog-sub">Монгол дуу оруулалт, тайлбартай шилдэг бүтээлүүд</p>
+                </div>
             </div>
             <div class="movie-grid" id="movie-grid"></div>
         </div>
@@ -281,39 +351,62 @@
                 <button class="btn-outline" onclick="toggleAdminView()">← Кино сан руу буцах</button>
             </div>
 
+            <!-- Cloud Sync Тохиргоо -->
+            <div id="cloud-sync-banner" style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                <div style="font-size: 0.85rem;">
+                    <span>☁️ Cloud Sync төлөв: </span>
+                    <strong id="token-status-text" style="color: #4ADE80;">Холбогдсон</strong>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <button type="button" class="btn-outline" style="padding: 4px 10px; font-size: 0.75rem;" onclick="promptSaveToken()">🔑 GitHub Түлхүүр оруулах</button>
+                </div>
+            </div>
+
             <!-- Ухаалаг Линк Үүсгэх Форм -->
             <div style="background: linear-gradient(135deg, #1A1F2C, #131722); border: 1px solid #3B82F6; border-radius: 12px; padding: 22px; margin-bottom: 24px;">
-                <h3 style="font-size: 1.1rem; color: #60A5FA; margin-bottom: 8px;">
-                    🔗 Ганц товшилтоор "Ухаалаг Линк" үүсгэх (Нэр, нууц үггүй)
+                <h3 style="font-size: 1.15rem; color: #60A5FA; margin-bottom: 8px;">
+                    🔗 Ухаалаг линк үүсгэх (Кино тус бүрээр эсвэл багцаар)
                 </h3>
-                <p style="font-size: 0.8rem; color: var(--text-sub); margin-bottom: 16px;">
-                    Линк үүсгээд хэрэглэгчид явуулахад л анх нээсэн төхөөрөмж дээр нь шууд түгжигдэнэ.
+                <p style="font-size: 0.85rem; color: var(--text-sub); margin-bottom: 16px;">
+                    Хэрэглэгчид ямар кино үзүүлэх болон кино тус бүрийн хүчинтэй хоногийг сонгоно.
                 </p>
-                <form onsubmit="handleCreatePass(event)" style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 14px;">
-                    <div>
-                        <label style="font-size: 0.8rem; color: var(--text-sub); font-weight: 600;">Хэрэглэгчийн тэмдэглэл (Жишээ нь FB нэр)</label>
-                        <input type="text" id="new-pass-note" class="form-control" placeholder="Жишээ: Доржийн Бат" required>
+                <form onsubmit="handleCreatePass(event)">
+                    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 14px; margin-bottom: 16px;">
+                        <div>
+                            <label style="font-size: 0.8rem; color: var(--text-sub); font-weight: 600;">Хэрэглэгчийн тэмдэглэл (FB нэр, утас)</label>
+                            <input type="text" id="new-pass-note" class="form-control" placeholder="Жишээ: Бат 99112233" required>
+                        </div>
+                        <div>
+                            <label style="font-size: 0.8rem; color: var(--text-sub); font-weight: 600;">Үндсэн хоног</label>
+                            <input type="number" id="new-pass-default-days" class="form-control" value="30" required onchange="updateMovieDays(this.value)">
+                        </div>
                     </div>
-                    <div>
-                        <label style="font-size: 0.8rem; color: var(--text-sub); font-weight: 600;">Үзэх хугацаа (Хоног)</label>
-                        <input type="number" id="new-pass-days" class="form-control" value="30" required>
+
+                    <!-- Кинонуудыг сонгох хэсэг -->
+                    <div style="background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-bottom: 16px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <label style="font-size: 0.85rem; font-weight: 700; color: #F3F4F6;">Хандах эрх олгох кинонуудыг сонгох:</label>
+                            <button type="button" class="btn-outline" style="padding: 2px 8px; font-size: 0.75rem;" onclick="selectAllMovies(true)">Бүгдийг сонгох (Багц)</button>
+                        </div>
+                        <div id="movie-selection-list" style="display: flex; flex-direction: column; gap: 8px;"></div>
                     </div>
-                    <div style="display: flex; align-items: flex-end;">
-                        <button type="submit" class="btn-primary" style="width: 100%; height: 42px; background: #2563EB;">✨ Линк үүсгэх</button>
-                    </div>
+
+                    <button type="submit" class="btn-primary" style="width: 100%; padding: 12px; font-size: 1rem;">
+                        ⚡ Линк үүсгэх & Хадгалах
+                    </button>
                 </form>
             </div>
 
-            <!-- Идэвхтэй Линкүүдийн Хүснэгт -->
-            <h3 style="font-size: 1.1rem; margin-bottom: 8px;">🎫 Идэвхтэй Ухаалаг Линкүүд & Төхөөрөмжийн Түгжээ</h3>
+            <!-- Үүссэн линкүүдийн хүснэгт -->
+            <h3 style="font-size: 1.1rem; margin-bottom: 12px;">📋 Хэрэглэгчдийн эрхийн жагсаалт</h3>
             <div class="admin-table-wrap">
                 <table>
                     <thead>
                         <tr>
-                            <th>Хэрэглэгч / Тэмдэглэл</th>
-                            <th>Шууд орох Ухаалаг Линк</th>
-                            <th>Хугацаа</th>
-                            <th>Түгжигдсэн төхөөрөмж</th>
+                            <th>Хэрэглэгч</th>
+                            <th>Ухаалаг линк</th>
+                            <th>Эрхтэй кинонууд & Хугацаа</th>
+                            <th>Төхөөрөмж</th>
                             <th>Төлөв</th>
                             <th>Үйлдэл</th>
                         </tr>
@@ -322,72 +415,93 @@
                 </table>
             </div>
 
-            <!-- Кино нэмэх форм -->
-            <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-top: 30px;">
-                <h3 style="font-size: 1rem; margin-bottom: 14px;">🎬 Шинэ кино сан руу нэмэх</h3>
-                <form onsubmit="handleCreateMovie(event)" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
-                    <div>
-                        <label style="font-size: 0.75rem; color: var(--text-sub);">Киноны нэр</label>
-                        <input type="text" id="new-movie-title" class="form-control" placeholder="Demon Slayer Season 1" required>
+            <!-- Шинэ Кино Санд Нэмэх Форм -->
+            <div style="margin-top: 36px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 22px;">
+                <h3 style="font-size: 1.1rem; margin-bottom: 16px;">🎬 Санд шинэ кино нэмэх</h3>
+                <form onsubmit="handleCreateMovie(event)" style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 14px;">
+                    <div class="form-group" style="grid-column: span 3;">
+                        <label>Киноны нэр</label>
+                        <input type="text" id="new-movie-title" class="form-control" placeholder="Жишээ: Demon Slayer: Hashira Training Arc" required>
                     </div>
-                    <div>
-                        <label style="font-size: 0.75rem; color: var(--text-sub);">Постер зураг (URL)</label>
-                        <input type="text" id="new-movie-poster" class="form-control" placeholder="https://...">
+                    <div class="form-group">
+                        <label>Bunny.net Embed Video URL</label>
+                        <input type="url" id="new-movie-url" class="form-control" placeholder="https://iframe.mediadelivery.net/embed/796263/..." required>
                     </div>
-                    <div>
-                        <label style="font-size: 0.75rem; color: var(--text-sub);">Bunny Stream Embed холбоос</label>
-                        <input type="text" id="new-movie-url" class="form-control" placeholder="https://iframe.mediadelivery.net/embed/..." required>
+                    <div class="form-group">
+                        <label>Постер зургийн URL</label>
+                        <input type="url" id="new-movie-poster" class="form-control" placeholder="https://..." value="https://images.unsplash.com/photo-1578632767115-351597cf2477?w=500">
                     </div>
-                    <div>
-                        <label style="font-size: 0.75rem; color: var(--text-sub);">Хугацаа</label>
-                        <input type="text" id="new-movie-duration" class="form-control" placeholder="2:34:00">
+                    <div class="form-group">
+                        <label>Үргэлжлэх хугацаа</label>
+                        <input type="text" id="new-movie-duration" class="form-control" placeholder="2ц 34м" value="2ц 34м">
                     </div>
-                    <div style="display: flex; align-items: flex-end;">
-                        <button type="submit" class="btn-primary" style="width: 100%;">Кино нэмэх</button>
-                    </div>
+                    <button type="submit" class="btn-primary" style="grid-column: span 3; padding: 10px;">+ Киног санд нэмэх</button>
                 </form>
             </div>
         </div>
     </div>
 
-    <!-- ТОГЛУУЛАГЧ -->
+    <!-- ТОГЛУУЛАГЧ (BUNNY STREAM IFRAME) -->
     <div id="player-view">
         <div class="player-header">
+            <h4 id="player-title" style="font-size: 1.1rem;">Demon Slayer</h4>
             <button class="btn-outline" onclick="closePlayer()">✕ Хаах</button>
-            <div id="player-title" style="font-weight: 700; font-size: 1rem;"></div>
-            <div style="width: 60px;"></div>
         </div>
         <div class="player-container">
             <iframe id="main-iframe" src="" allow="accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture;" allowfullscreen="true"></iframe>
         </div>
     </div>
 
+    <!-- КИНО НЭМЖ ОЛГОХ MODAL (ADD MOVIE TO EXISTING USER) -->
+    <div class="modal-overlay" id="add-movie-modal">
+        <div class="modal-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 style="font-size: 1.15rem; color: #60A5FA;">➕ Хэрэглэгчид шинэ кино нэмэх</h3>
+                <button class="btn-outline" style="padding: 2px 8px;" onclick="closeAddMovieModal()">✕</button>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--text-sub); margin-bottom: 14px;" id="modal-user-label"></p>
+            
+            <form onsubmit="handleConfirmAddMovie(event)">
+                <input type="hidden" id="modal-pass-id">
+                <div class="form-group">
+                    <label>Нэмэх кино сонгох</label>
+                    <select id="modal-movie-select" class="form-control" required></select>
+                </div>
+                <div class="form-group">
+                    <label>Энэ киног үзэх тусдаа хугацаа (Хоног)</label>
+                    <input type="number" id="modal-movie-days" class="form-control" value="30" required>
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button type="button" class="btn-outline" style="flex: 1;" onclick="closeAddMovieModal()">Болих</button>
+                    <button type="submit" class="btn-primary" style="flex: 1;">Нэмж идэвхжүүлэх</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
-        // БҮРЭН АВТОМАТ ҮҮЛЭН САН БА ТӨХӨӨРӨМЖИЙН ХАМГААЛАЛТ
-        const DEFAULT_MOVIES = [
-            {
-                id: 1,
-                title: "Demon Slayer: Kimetsu no Yaiba - Infinity Castle",
-                poster_url: "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=500",
-                video_url: "https://iframe.mediadelivery.net/embed/796263/42677ba9-9a48-424b-a289-828620ea3eb2",
-                duration: "2:34:42",
-                category: "Anime (Hardcore Монгол хадмал)"
-            }
-        ];
+        // ТӨВ ӨГӨГДӨЛ (GITHUB + LOCALSTORAGE)
+        const GITHUB_REPO = 'baatarkhuudamjin0585-sys/MNCinema';
+        const GITHUB_RAW_URL = `https://raw.githubusercontent.com/${GITHUB_REPO}/main/data.json`;
+        const GITHUB_API_URL = `https://api.github.com/repos/${GITHUB_REPO}/contents/data.json`;
+        let GITHUB_TOKEN = localStorage.getItem('mn_gh_token') || '';
 
-        function getStoredMovies() {
-            const m = localStorage.getItem('mn_movies');
-            return m ? JSON.parse(m) : DEFAULT_MOVIES;
-        }
+        let appData = {
+            movies: [
+                {
+                    id: "movie_1",
+                    title: "Demon Slayer: Kimetsu no Yaiba",
+                    category: "Анимэ (Монгол орчуулга)",
+                    duration: "2ц 34м",
+                    poster_url: "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=500",
+                    video_url: "https://iframe.mediadelivery.net/embed/796263/42677ba9-9a48-424b-a289-828620ea3eb2"
+                }
+            ],
+            passes: []
+        };
 
-        function getStoredPasses() {
-            const p = localStorage.getItem('mn_passes');
-            return p ? JSON.parse(p) : [];
-        }
-
-        function savePasses(p) {
-            localStorage.setItem('mn_passes', JSON.stringify(p));
-        }
+        let currentUser = null;
+        let currentPass = null;
 
         function getDeviceId() {
             let dId = localStorage.getItem('mn_device_id');
@@ -398,71 +512,124 @@
             return dId;
         }
 
-        let currentUser = null;
+        // ӨГӨГДӨЛ ТАТАХ
+        async function loadData() {
+            try {
+                const res = await fetch(GITHUB_RAW_URL + '?t=' + Date.now());
+                if (res.ok) {
+                    const cloudData = await res.json();
+                    if (cloudData && cloudData.movies) {
+                        appData = cloudData;
+                        localStorage.setItem('mn_cached_data', JSON.stringify(appData));
+                        return;
+                    }
+                }
+            } catch (e) {
+                console.warn('GitHub RAW fetch error, fallback to cache:', e);
+            }
 
-        // ШАЛГАЛТ
-        function initApp() {
+            const cached = localStorage.getItem('mn_cached_data');
+            if (cached) {
+                try { appData = JSON.parse(cached); } catch (e) {}
+            }
+        }
+
+        // ӨГӨГДӨЛ ХАДГАЛАХ (GITHUB RPO & LOCAL)
+        async function saveData() {
+            localStorage.setItem('mn_cached_data', JSON.stringify(appData));
+
+            if (!GITHUB_TOKEN) return;
+
+            try {
+                // 1. Одоо байгаа sha авах
+                const getRes = await fetch(GITHUB_API_URL, {
+                    headers: {
+                        'Authorization': `token ${GITHUB_TOKEN}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+                let sha = null;
+                if (getRes.ok) {
+                    const fileData = await getRes.json();
+                    sha = fileData.sha;
+                }
+
+                // 2. Шинэчлэх
+                const contentStr = JSON.stringify(appData, null, 2);
+                const contentBase64 = btoa(unescape(encodeURIComponent(contentStr)));
+
+                await fetch(GITHUB_API_URL, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${GITHUB_TOKEN}`,
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: 'Sync data.json update',
+                        content: contentBase64,
+                        sha: sha
+                    })
+                });
+            } catch (err) {
+                console.error('GitHub API sync error:', err);
+            }
+        }
+
+        // ЭХЛЭХ ФУНКЦ
+        async function initApp() {
+            await loadData();
+
             const urlParams = new URLSearchParams(window.location.search);
             const passKey = urlParams.get('pass');
 
             if (passKey) {
-                let noteName = 'Үзэгч (Эрхтэй)';
-                let isValidPass = false;
+                // УХААЛАГ ЛИНК ШАЛГАЛТ
+                let foundPass = appData.passes.find(p => p.key === passKey);
 
-                // 1. Хэрэв self-contained mn_ код бол
-                if (passKey.startsWith('mn_')) {
-                    try {
-                        const raw = decodeURIComponent(atob(passKey.substring(3)));
-                        const pData = JSON.parse(raw);
-                        const now = Date.now();
-                        const expireMs = pData.created + (pData.days * 24 * 60 * 60 * 1000);
-
-                        if (now > expireMs) {
-                            alert('⌛ Энэхүү үзэх эрхийн хугацаа (' + pData.days + ' хоног) дууссан байна.');
-                            showAuthView();
-                            return;
-                        }
-
-                        // Төхөөрөмж шалгах
-                        const myDevice = getDeviceId();
-                        const boundKey = 'mn_lock_' + pData.id;
-                        let boundDev = localStorage.getItem(boundKey);
-
-                        if (!boundDev) {
-                            localStorage.setItem(boundKey, myDevice);
-                        } else if (boundDev !== myDevice) {
-                            alert('🔒 АНХААРУУЛГА: Энэ эрх өөр анхны төхөөрөмж дээр аль хэдийн идэвхжсэн байна! Бусад төхөөрөмжөөс үзэх боломжгүй.');
-                            showAuthView();
-                            return;
-                        }
-
-                        noteName = pData.note || 'Үзэгч';
-                        isValidPass = true;
-                    } catch (err) {
-                        console.error('Invalid token format', err);
-                    }
-                } else if (passKey.startsWith('pass_')) {
-                    // Түрүүний туршилтын линкүүд болон энгийн линкүүд
-                    const passes = getStoredPasses();
-                    const p = passes.find(x => x.key === passKey);
-                    if (p) {
-                        noteName = p.note;
-                    }
-                    isValidPass = true;
+                // Хэрэв түрүүний хуучин pass_ эсвэл өөр төхөөрөмжийнх бол
+                if (!foundPass && passKey.startsWith('pass_')) {
+                    foundPass = {
+                        id: Date.now(),
+                        key: passKey,
+                        note: 'Үзэгч (Эрхтэй)',
+                        lockedDeviceId: null,
+                        isActive: true,
+                        access: {}
+                    };
+                    // Бүх киног олгох
+                    appData.movies.forEach(m => {
+                        foundPass.access[m.id] = { days: 30, expiresAt: null };
+                    });
                 }
 
-                if (isValidPass) {
-                    // ХЭРЭГЛЭГЧИД ЯМАР Ч НЭВТРЭХ ЦОНХ ХАРУУЛАХГҮЙ!
-                    currentUser = { name: noteName, isAdmin: false };
+                if (foundPass) {
+                    if (!foundPass.isActive) {
+                        alert('⛔ Энэ линкийн эрхийг хаасан байна.');
+                        showAuthView();
+                        return;
+                    }
+
+                    const myDevice = getDeviceId();
+                    // Төхөөрөмж түгжих шалгалт
+                    if (!foundPass.lockedDeviceId) {
+                        foundPass.lockedDeviceId = myDevice;
+                        foundPass.deviceInfo = (navigator.userAgent.includes('iPhone') ? 'iPhone' : 
+                                               navigator.userAgent.includes('Android') ? 'Android' : 'Компьютер');
+                        saveData();
+                    } else if (foundPass.lockedDeviceId !== myDevice) {
+                        alert('🔒 АНХААРУУЛГА: Энэ линк анх нээгдсэн өөр төхөөрөмж дээр аль хэдийн түгжигдсэн байна! Бусад төхөөрөмжөөс үзэх боломжгүй.');
+                        showAuthView();
+                        return;
+                    }
+
+                    // Амжилттай нэвтэрлээ
+                    currentPass = foundPass;
+                    currentUser = { name: foundPass.note, isAdmin: false, passKey: foundPass.key };
                     sessionStorage.setItem('mn_session', JSON.stringify(currentUser));
+                    
                     window.history.replaceState({}, document.title, window.location.pathname);
                     showMainView();
-
-                    // ШУУД КИНОГ НЭЭЖ ТОГЛУУЛНА!
-                    const movies = getStoredMovies();
-                    if (movies && movies.length > 0) {
-                        playMovie(movies[0]);
-                    }
                     return;
                 } else {
                     alert('Энэ ухаалаг линк хүчингүй байна.');
@@ -473,6 +640,9 @@
             const sess = sessionStorage.getItem('mn_session');
             if (sess) {
                 currentUser = JSON.parse(sess);
+                if (!currentUser.isAdmin && currentUser.passKey) {
+                    currentPass = appData.passes.find(p => p.key === currentUser.passKey);
+                }
                 showMainView();
             } else {
                 showAuthView();
@@ -496,6 +666,7 @@
         function logout() {
             sessionStorage.removeItem('mn_session');
             currentUser = null;
+            currentPass = null;
             showAuthView();
         }
 
@@ -519,6 +690,9 @@
 
             if (currentUser.isAdmin) {
                 document.getElementById('admin-nav-btn').style.display = 'inline-block';
+                document.getElementById('catalog-title').innerText = '✨ Бүх кино сан (Админ харагдац)';
+            } else {
+                document.getElementById('catalog-title').innerText = `👋 Сайн байна уу, ${currentUser.name}!`;
             }
 
             renderMovies();
@@ -527,20 +701,69 @@
         function renderMovies() {
             const grid = document.getElementById('movie-grid');
             grid.innerHTML = '';
-            const movies = getStoredMovies();
 
-            movies.forEach(m => {
+            appData.movies.forEach(m => {
+                let hasAccess = false;
+                let daysLeftText = '';
+                let isExpired = false;
+
+                if (currentUser.isAdmin) {
+                    hasAccess = true;
+                    daysLeftText = 'Админ эрхтэй';
+                } else if (currentPass && currentPass.access && currentPass.access[m.id]) {
+                    const acc = currentPass.access[m.id];
+                    if (acc.expiresAt) {
+                        const diff = new Date(acc.expiresAt) - new Date();
+                        const daysLeft = Math.ceil(diff / (1000 * 60 * 60 * 24));
+                        if (daysLeft > 0) {
+                            hasAccess = true;
+                            daysLeftText = `🟢 ${daysLeft} хоног үлдсэн`;
+                        } else {
+                            isExpired = true;
+                            daysLeftText = `⌛ Хугацаа дууссан`;
+                        }
+                    } else {
+                        hasAccess = true;
+                        daysLeftText = `🟢 ${acc.days || 30} хоног эрхтэй`;
+                    }
+                } else {
+                    daysLeftText = '🔒 Эрх аваагүй';
+                }
+
                 const card = document.createElement('div');
-                card.className = 'movie-card';
-                card.onclick = () => playMovie(m);
+                card.className = `movie-card ${!hasAccess ? 'locked-card' : ''}`;
+                card.onclick = () => {
+                    if (hasAccess) {
+                        // Хэрэв анх удаа үзэж байгаа бол expiresAt-ийг тооцож эхлүүлнэ
+                        if (currentPass && currentPass.access && currentPass.access[m.id] && !currentPass.access[m.id].expiresAt) {
+                            const days = currentPass.access[m.id].days || 30;
+                            const exp = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+                            currentPass.access[m.id].expiresAt = exp.toISOString();
+                            saveData();
+                        }
+                        playMovie(m);
+                    } else {
+                        alert(isExpired ? 
+                            `⌛ "${m.title}" киног үзэх эрхийн хугацаа дууссан байна. Хугацаагаа сунгуулах бол админтай холбогдоно уу.` :
+                            `🔒 Та "${m.title}" киног хараахан аваагүй байна. Үзэхийг хүсвэл админтай холбогдоно уу.`
+                        );
+                    }
+                };
+
                 card.innerHTML = `
                     <div class="poster-wrap">
                         <img src="${m.poster_url}" alt="${m.title}">
                         <div class="duration-badge">${m.duration}</div>
+                        <div class="access-badge ${hasAccess ? 'badge-unlocked' : 'badge-locked-overlay'}">
+                            ${hasAccess ? 'Үзэх боломжтой' : 'Түгжээтэй'}
+                        </div>
                     </div>
                     <div class="movie-info">
                         <div class="movie-title">${m.title}</div>
                         <div class="movie-cat">${m.category}</div>
+                        <div class="movie-time-left" style="color: ${hasAccess ? '#4ADE80' : isExpired ? '#F87171' : '#94A3B8'};">
+                            ${daysLeftText}
+                        </div>
                     </div>
                 `;
                 grid.appendChild(card);
@@ -570,6 +793,8 @@
             if (adminView.style.display === 'none') {
                 mainView.style.display = 'none';
                 adminView.style.display = 'block';
+                updateTokenStatusUI();
+                renderAdminMovieSelections();
                 renderPasses();
             } else {
                 adminView.style.display = 'none';
@@ -578,64 +803,144 @@
             }
         }
 
-        // ЛИНК ҮҮСГЭХ
-        function handleCreatePass(e) {
-            e.preventDefault();
-            const note = document.getElementById('new-pass-note').value.trim() || 'Үзэгч';
-            const days = parseInt(document.getElementById('new-pass-days').value) || 30;
+        function updateTokenStatusUI() {
+            const el = document.getElementById('token-status-text');
+            if (el) {
+                if (GITHUB_TOKEN) {
+                    el.innerHTML = '<span style="color:#4ADE80;">🟢 Холбогдсон (Шууд бүх төхөөрөмжтэй сүлжээгээр синхрончлогдоно)</span>';
+                } else {
+                    el.innerHTML = '<span style="color:#F87171;">🔴 Холбогдоогүй (Түлхүүрээ оруулна уу)</span>';
+                }
+            }
+        }
 
-            const payload = {
-                id: Date.now(),
-                note: note,
-                days: days,
-                created: Date.now()
-            };
-            // Бүрэн бие даасан token үүсгэх (Хэрэглэгч линкээр шууд кино үзнэ)
-            const token = 'mn_' + btoa(encodeURIComponent(JSON.stringify(payload)));
+        function promptSaveToken() {
+            const t = prompt('GitHub Personal Access Token (ghp_...)-ээ оруулна уу:', GITHUB_TOKEN || '');
+            if (t !== null && t.trim()) {
+                GITHUB_TOKEN = t.trim();
+                localStorage.setItem('mn_gh_token', GITHUB_TOKEN);
+                updateTokenStatusUI();
+                alert('Түлхүүр амжилттай хадгалагдлаа!');
+            }
+        }
+
+        // АДМИН: Кино сонголтын жагсаалт харуулах
+        function renderAdminMovieSelections() {
+            const container = document.getElementById('movie-selection-list');
+            container.innerHTML = '';
+            const defaultDays = document.getElementById('new-pass-default-days').value || 30;
+
+            appData.movies.forEach(m => {
+                const row = document.createElement('div');
+                row.style.cssText = 'display:flex; justify-content:space-between; align-items:center; background:#111620; padding:8px 12px; border-radius:6px;';
+                row.innerHTML = `
+                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:0.9rem;">
+                        <input type="checkbox" class="movie-select-chk" data-movie-id="${m.id}" checked>
+                        <span>${m.title}</span>
+                    </label>
+                    <div style="display:flex; align-items:center; gap:6px;">
+                        <span style="font-size:0.75rem; color:var(--text-sub);">Хугацаа:</span>
+                        <input type="number" class="form-control movie-days-input" data-movie-id="${m.id}" value="${defaultDays}" style="width:70px; padding:3px 6px; font-size:0.8rem;">
+                        <span style="font-size:0.75rem; color:var(--text-sub);">хоног</span>
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        function selectAllMovies(checked) {
+            document.querySelectorAll('.movie-select-chk').forEach(c => c.checked = checked);
+        }
+
+        function updateMovieDays(val) {
+            document.querySelectorAll('.movie-days-input').forEach(i => i.value = val);
+        }
+
+        // АДМИН: ШИНЭ ЛИНК ҮҮСГЭХ
+        async function handleCreatePass(e) {
+            e.preventDefault();
+            const note = document.getElementById('new-pass-note').value.trim();
+            if (!note) return;
+
+            const access = {};
+            let selectedCount = 0;
+
+            document.querySelectorAll('.movie-select-chk').forEach(chk => {
+                if (chk.checked) {
+                    const mId = chk.getAttribute('data-movie-id');
+                    const daysInput = document.querySelector(`.movie-days-input[data-movie-id="${mId}"]`);
+                    const days = parseInt(daysInput.value) || 30;
+                    access[mId] = {
+                        days: days,
+                        expiresAt: null
+                    };
+                    selectedCount++;
+                }
+            });
+
+            if (selectedCount === 0) {
+                alert('Ядаж 1 кино сонгоно уу!');
+                return;
+            }
 
             const newPass = {
-                id: payload.id,
-                key: token,
+                id: Date.now(),
+                key: 'pass_' + Math.random().toString(36).substring(2, 9),
                 note: note,
-                days: days,
                 lockedDeviceId: null,
                 deviceInfo: null,
-                expiresAt: null,
-                isActive: true
+                isActive: true,
+                access: access
             };
 
-            const passes = getStoredPasses();
-            passes.unshift(newPass);
-            savePasses(passes);
+            appData.passes.unshift(newPass);
+            await saveData();
 
             document.getElementById('new-pass-note').value = '';
             renderPasses();
-            alert('Ухаалаг линк амжилттай үүслээ! Хэрэглэгч рүү хуулж илгээхэд шууд кино гарч эхэлнэ.');
+            alert('Ухаалаг линк үүслээ! Хэрэглэгчид "Хуулах" дарж өгөхөд сонгосон кинонууд нь шууд харагдах болно.');
         }
 
+        // АДМИН: ПАСС ХҮСНЭГТ
         function renderPasses() {
             const tbody = document.getElementById('admin-passes-tbody');
             tbody.innerHTML = '';
-            const passes = getStoredPasses();
 
-            if (passes.length === 0) {
+            if (appData.passes.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-sub); padding:20px;">Одоогоор линк үүсээгүй байна.</td></tr>`;
                 return;
             }
 
-            passes.forEach(p => {
+            appData.passes.forEach(p => {
                 const fullLink = `${window.location.origin}/?pass=${p.key}`;
                 const isLocked = !!p.lockedDeviceId;
+
+                // Эрхтэй кинонуудыг гаргах
+                let moviesHtml = '';
+                if (p.access) {
+                    Object.keys(p.access).forEach(mId => {
+                        const mObj = appData.movies.find(x => x.id === mId);
+                        const mTitle = mObj ? mObj.title : mId;
+                        const acc = p.access[mId];
+                        let info = `${acc.days}х`;
+                        if (acc.expiresAt) {
+                            const dLeft = Math.ceil((new Date(acc.expiresAt) - new Date()) / (1000 * 60 * 60 * 24));
+                            info = dLeft > 0 ? `${dLeft}х үлдсэн` : 'дууссан';
+                        }
+                        moviesHtml += `<span class="tag-pill">🎬 ${mTitle}: <b>${info}</b></span>`;
+                    });
+                }
+
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td><strong>${p.note}</strong></td>
                     <td>
                         <div style="display:flex; gap:6px; align-items:center;">
-                            <input type="text" class="form-control" style="padding:4px 8px; font-size:0.75rem; width:180px;" value="${fullLink}" readonly>
+                            <input type="text" class="form-control" style="padding:4px 8px; font-size:0.75rem; width:170px;" value="${fullLink}" readonly>
                             <button class="btn-primary" style="padding:4px 10px; font-size:0.75rem;" onclick="copyLink('${fullLink}')">Хуулах</button>
                         </div>
                     </td>
-                    <td><small>${p.expiresAt || p.days + ' хоног'}</small></td>
+                    <td style="max-width:240px;">${moviesHtml || '<small style="color:var(--text-sub)">Киногүй</small>'}</td>
                     <td>
                         <small style="color:${isLocked ? '#60A5FA' : '#9CA3AF'}">
                             ${isLocked ? '🔒 ' + p.deviceInfo : 'Нээгдээгүй (Чөлөөтэй)'}
@@ -647,6 +952,7 @@
                         </span>
                     </td>
                     <td>
+                        <button class="btn-outline" style="padding:3px 8px; font-size:0.75rem; margin-right:4px;" onclick="openAddMovieModal(${p.id})">➕ Кино нэмэх</button>
                         ${isLocked ? `<button class="btn-outline" style="padding:3px 8px; font-size:0.75rem;" onclick="resetPass(${p.id})">Түгжээ тайлах</button>` : ''}
                         <button class="btn-outline" style="padding:3px 8px; font-size:0.75rem; margin-left:4px;" onclick="togglePass(${p.id})">
                             ${p.isActive ? 'Хаах' : 'Нээх'}
@@ -659,50 +965,99 @@
 
         function copyLink(link) {
             navigator.clipboard.writeText(link).then(() => {
-                alert('Линк хуулагдлаа! Хэрэглэгч рүү шууд илгээж болно.');
+                alert('Линк хуулагдлаа! Хэрэглэгч рүү шууд илгээнэ үү.');
             });
         }
 
-        function resetPass(id) {
+        async function resetPass(id) {
             if (!confirm('Энэ линкийн төхөөрөмжийн түгжээг тайлах уу?')) return;
-            const passes = getStoredPasses();
-            const p = passes.find(x => x.id === id);
+            const p = appData.passes.find(x => x.id === id);
             if (p) {
                 p.lockedDeviceId = null;
                 p.deviceInfo = null;
-                savePasses(passes);
+                await saveData();
                 renderPasses();
             }
         }
 
-        function togglePass(id) {
-            const passes = getStoredPasses();
-            const p = passes.find(x => x.id === id);
+        async function togglePass(id) {
+            const p = appData.passes.find(x => x.id === id);
             if (p) {
                 p.isActive = !p.isActive;
-                savePasses(passes);
+                await saveData();
                 renderPasses();
             }
         }
 
-        function handleCreateMovie(e) {
-            e.preventDefault();
-            const title = document.getElementById('new-movie-title').value;
-            const poster = document.getElementById('new-movie-poster').value || 'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=500';
-            const url = document.getElementById('new-movie-url').value;
-            const dur = document.getElementById('new-movie-duration').value || 'Full HD';
+        // АДМИН: БАЙГАА ХЭРЭГЛЭГЧИД ШИНЭ КИНО НЭМЖ ОЛГОХ MODAL
+        function openAddMovieModal(passId) {
+            const p = appData.passes.find(x => x.id === passId);
+            if (!p) return;
 
-            const movies = getStoredMovies();
-            movies.unshift({
-                id: Date.now(),
-                title: title,
-                poster_url: poster,
-                video_url: url,
-                duration: dur,
-                category: "Anime"
+            document.getElementById('modal-pass-id').value = passId;
+            document.getElementById('modal-user-label').innerHTML = `Хэрэглэгч: <b>${p.note}</b>`;
+
+            const select = document.getElementById('modal-movie-select');
+            select.innerHTML = '';
+            appData.movies.forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m.id;
+                opt.innerText = m.title;
+                select.appendChild(opt);
             });
-            localStorage.setItem('mn_movies', JSON.stringify(movies));
-            alert('Шинэ кино нэмэгдлээ!');
+
+            document.getElementById('add-movie-modal').style.display = 'flex';
+        }
+
+        function closeAddMovieModal() {
+            document.getElementById('add-movie-modal').style.display = 'none';
+        }
+
+        async function handleConfirmAddMovie(e) {
+            e.preventDefault();
+            const passId = parseInt(document.getElementById('modal-pass-id').value);
+            const movieId = document.getElementById('modal-movie-select').value;
+            const days = parseInt(document.getElementById('modal-movie-days').value) || 30;
+
+            const p = appData.passes.find(x => x.id === passId);
+            if (p) {
+                if (!p.access) p.access = {};
+                // Шинэ киног өөрийн гэсэн хугацаатайгаар олгох
+                p.access[movieId] = {
+                    days: days,
+                    expiresAt: null
+                };
+                await saveData();
+                closeAddMovieModal();
+                renderPasses();
+                alert(`"${p.note}" хэрэглэгчид шинэ кино амжилттай нэмэгдлээ! Хэрэглэгч линкээ шинэчлэхэд шууд нээгдэнэ.`);
+            }
+        }
+
+        // АДМИН: САНД КИНО НЭМЭХ
+        async function handleCreateMovie(e) {
+            e.preventDefault();
+            const title = document.getElementById('new-movie-title').value.trim();
+            const poster = document.getElementById('new-movie-poster').value.trim() || 'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=500';
+            const url = document.getElementById('new-movie-url').value.trim();
+            const dur = document.getElementById('new-movie-duration').value.trim() || '2ц 30м';
+
+            const newMovie = {
+                id: 'movie_' + Date.now(),
+                title: title,
+                category: "Анимэ (Монгол орчуулга)",
+                duration: dur,
+                poster_url: poster,
+                video_url: url
+            };
+
+            appData.movies.push(newMovie);
+            await saveData();
+
+            document.getElementById('new-movie-title').value = '';
+            document.getElementById('new-movie-url').value = '';
+            alert('Шинэ кино санд амжилттай нэмэгдлээ!');
+            renderAdminMovieSelections();
             toggleAdminView();
         }
 
