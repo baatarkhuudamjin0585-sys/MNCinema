@@ -24,7 +24,7 @@
       "note": "Test 1",
       "lockedDeviceId": "DEV-emthhp3-mvxxxpga",
       "deviceInfo": "Компьютер",
-      "isActive": true,
+      "isActive": false,
       "access": {
         "movie_1793539906531": {
           "days": 15,
