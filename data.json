@@ -22,8 +22,8 @@
       "id": 1793544231412,
       "key": "pass_rmpi1hu",
       "note": "Test 1",
-      "lockedDeviceId": "DEV-emthhp3-mvxxxpga",
-      "deviceInfo": "Компьютер",
+      "lockedDeviceId": null,
+      "deviceInfo": null,
       "isActive": true,
       "access": {
         "movie_1793539906531": {
