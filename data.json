@@ -1,0 +1,29 @@
+{
+  "movies": [
+    {
+      "id": "movie_1",
+      "title": "Demon Slayer: Kimetsu no Yaiba",
+      "category": "Анимэ (Монгол орчуулга)",
+      "duration": "2ц 34м",
+      "poster_url": "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=500",
+      "video_url": "https://iframe.mediadelivery.net/embed/796263/42677ba9-9a48-424b-a289-828620ea3eb2"
+    }
+  ],
+  "passes": [
+    {
+      "id": 1730460000000,
+      "key": "pass_qz9cgymo",
+      "note": "Бат (Туршилт)",
+      "lockedDeviceId": null,
+      "deviceInfo": null,
+      "isActive": true,
+      "access": {
+        "movie_1": {
+          "days": 30,
+          "activatedAt": null,
+          "expiresAt": null
+        }
+      }
+    }
+  ]
+}
