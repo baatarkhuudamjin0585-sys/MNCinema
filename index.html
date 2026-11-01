@@ -312,6 +312,18 @@
     </header>
 
     <div class="container">
+        <!-- ТҮГЖИГДСЭН ДЭЛГЭЦ (ЗӨВХӨН ҮЗЭГЧДЭД) -->
+        <div id="locked-view" style="display: none; max-width: 460px; margin: 80px auto; background: var(--bg-card); border: 1px solid rgba(239, 68, 68, 0.4); border-radius: 16px; padding: 40px 28px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.6);">
+            <div style="font-size: 3.5rem; margin-bottom: 16px;">🔒</div>
+            <h2 style="font-size: 1.35rem; color: #F87171; font-weight: 800; margin-bottom: 12px;" id="locked-title">Үзэх эрх түгжигдсэн байна</h2>
+            <p id="locked-message" style="font-size: 0.95rem; color: #E2E8F0; line-height: 1.6; margin-bottom: 24px;">
+                Энэхүү ухаалаг линк анх нээгдсэн өөр төхөөрөмж дээр түгжигдсэн тул энэ төхөөрөмжөөс үзэх боломжгүй.
+            </p>
+            <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; font-size: 0.8rem; color: var(--text-sub); line-height: 1.5;">
+                🛡️ MN Cinema нь 1 эрхийг зөвхөн анхны 1 төхөөрөмжид баталгаажуулдаг тул бусадтай хуваалцах боломжгүй.
+            </div>
+        </div>
+
         <!-- НЭВТРЭХ ХЭСЭГ (АДМИН) -->
         <div id="auth-view">
             <div class="auth-title">Тавтай морил</div>
@@ -613,9 +625,10 @@
                     const result = await res.json();
 
                     if (!res.ok || !result.success) {
-                        alert(result.message || 'Энэ ухаалаг линк хүчингүй байна.');
-                        window.history.replaceState({}, document.title, window.location.pathname);
-                        showAuthView();
+                        showLockedView(
+                            result.error === 'DEVICE_LOCKED' ? '🔒 Төхөөрөмж түгжигдсэн байна' : '⛔ Хандах эрхгүй',
+                            result.message || 'Энэхүү ухаалаг линк анх нээгдсэн өөр төхөөрөмж дээр түгжигдсэн тул энэ төхөөрөмжөөс үзэх боломжгүй.'
+                        );
                         return;
                     }
 
@@ -630,8 +643,7 @@
                     return;
                 } catch (err) {
                     console.error('Pass check error:', err);
-                    alert('Холболтод алдаа гарлаа.');
-                    showAuthView();
+                    showLockedView('⚠️ Холболтын алдаа', 'Сервертэй холбогдоход алдаа гарлаа. Та дахин оролдоно уу.');
                     return;
                 }
             }
@@ -681,7 +693,22 @@
             showAuthView();
         }
 
+        function showLockedView(title, msg) {
+            document.getElementById('auth-view').style.display = 'none';
+            document.getElementById('main-view').style.display = 'none';
+            document.getElementById('admin-view').style.display = 'none';
+            document.getElementById('user-display').style.display = 'none';
+            document.getElementById('admin-nav-btn').style.display = 'none';
+            document.getElementById('logout-btn').style.display = 'none';
+
+            const lv = document.getElementById('locked-view');
+            if (title) document.getElementById('locked-title').innerText = title;
+            if (msg) document.getElementById('locked-message').innerText = msg;
+            lv.style.display = 'block';
+        }
+
         function showAuthView() {
+            document.getElementById('locked-view').style.display = 'none';
             document.getElementById('auth-view').style.display = 'block';
             document.getElementById('main-view').style.display = 'none';
             document.getElementById('admin-view').style.display = 'none';
@@ -691,6 +718,7 @@
         }
 
         function showMainView() {
+            document.getElementById('locked-view').style.display = 'none';
             document.getElementById('auth-view').style.display = 'none';
             document.getElementById('main-view').style.display = 'block';
             document.getElementById('admin-view').style.display = 'none';
