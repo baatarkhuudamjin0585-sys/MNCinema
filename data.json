@@ -22,8 +22,8 @@
       "id": 1793544436854,
       "key": "pass_ggrgdnm",
       "note": "Test",
-      "lockedDeviceId": "DEV-hmqorm1-mvxv6mgd",
-      "deviceInfo": "iPhone",
+      "lockedDeviceId": null,
+      "deviceInfo": null,
       "isActive": true,
       "access": {
         "movie_1793539906531": {
