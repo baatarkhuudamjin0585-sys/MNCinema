@@ -717,6 +717,7 @@
 
         // СИСТЕМИЙГ ЭХЛҮҮЛЭХ
         async function initApp() {
+            const dataPromise = loadData(); // Сангийн өгөгдлийг ард даруй татаж эхлүүлнэ
             const urlParams = new URLSearchParams(window.location.search);
             const passKey = urlParams.get('pass');
 
@@ -759,7 +760,7 @@
             const sess = sessionStorage.getItem('mn_session');
             if (sess) {
                 showLoading();
-                await loadData();
+                await dataPromise;
                 try {
                     currentUser = JSON.parse(sess);
                     if (!currentUser.isAdmin && currentUser.passKey) {
@@ -782,7 +783,7 @@
             }
         }
 
-        function handleLogin() {
+        async function handleLogin() {
             const u = document.getElementById('login-username').value.trim();
             const p = document.getElementById('login-password').value.trim();
 
@@ -799,6 +800,8 @@
             if (valid || (u === '99670924' && p === 'Baku0923!') || (u === 'admin' && p === 'admin123')) {
                 currentUser = { name: 'Администратор', isAdmin: true };
                 sessionStorage.setItem('mn_session', JSON.stringify(currentUser));
+                showLoading();
+                await loadData();
                 showMainView();
                 toggleAdminView();
             } else {
@@ -895,12 +898,15 @@
             playerView.style.display = 'none';
         }
 
-        function toggleAdminView() {
+        async function toggleAdminView() {
             const mainView = document.getElementById('main-view');
             const adminView = document.getElementById('admin-view');
             if (adminView.style.display === 'none') {
                 mainView.style.display = 'none';
                 adminView.style.display = 'block';
+                if (!appData.movies || appData.movies.length === 0) {
+                    await loadData();
+                }
                 renderAdminMovieSelections();
                 renderAdminMoviesList();
                 renderPasses();
