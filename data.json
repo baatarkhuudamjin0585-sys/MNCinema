@@ -22,13 +22,13 @@
       "id": 1793544231412,
       "key": "pass_rmpi1hu",
       "note": "Test 1",
-      "lockedDeviceId": null,
-      "deviceInfo": null,
+      "lockedDeviceId": "DEV-emthhp3-mvxxxpga",
+      "deviceInfo": "Компьютер",
       "isActive": true,
       "access": {
         "movie_1793539906531": {
           "days": 15,
-          "expiresAt": null
+          "expiresAt": "2026-11-16T14:44:06.455Z"
         }
       }
     }
