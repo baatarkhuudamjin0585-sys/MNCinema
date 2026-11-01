@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MN Cinema Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #0B0E14;
+            --bg-card: #151A23;
+            --bg-hover: #1E2634;
+            --accent: #E50914;
+            --accent-glow: rgba(229, 9, 20, 0.4);
+            --text-main: #F3F4F6;
+            --text-sub: #9CA3AF;
+            --border: #262E3D;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Navbar */
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(11, 14, 20, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            font-weight: 800;
+            font-size: 1.25rem;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo span {
+            color: var(--accent);
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-outline:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 4px 14px var(--accent-glow);
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        /* Container */
+        .container {
+            flex: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            padding: 20px;
+        }
+
+        /* Auth View */
+        #auth-view {
+            max-width: 400px;
+            margin: 60px auto;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+
+        .auth-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .auth-sub {
+            color: var(--text-sub);
+            font-size: 0.85rem;
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-sub);
+            margin-bottom: 6px;
+        }
+
+        .form-control {
+            width: 100%;
+            background: #0B0E14;
+            border: 1px solid var(--border);
+            color: #fff;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-control:focus {
+            border-color: var(--accent);
+        }
+
+        .alert-box {
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid #ef4444;
+            color: #fca5a5;
+        }
+
+        /* Movies Grid */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .movie-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .movie-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+            position: relative;
+        }
+
+        .movie-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.6);
+        }
+
+        .poster-wrap {
+            aspect-ratio: 2/3;
+            width: 100%;
+            background: #1C2331;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .poster-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .duration-badge {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            background: rgba(0,0,0,0.75);
+            backdrop-filter: blur(4px);
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 3px 6px;
+            border-radius: 4px;
+        }
+
+        .movie-info {
+            padding: 12px 14px;
+        }
+
+        .movie-title {
+            font-weight: 700;
+            font-size: 0.95rem;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .movie-cat {
+            color: var(--text-sub);
+            font-size: 0.75rem;
+        }
+
+        /* Player Modal / View */
+        #player-view {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 200;
+            background: #000;
+            flex-direction: column;
+        }
+
+        .player-header {
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent);
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 10;
+        }
+
+        .player-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            max-height: 100vh;
+            outline: none;
+        }
+
+        /* Dynamic Watermark for Security */
+        .dynamic-watermark {
+            position: absolute;
+            z-index: 5;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.18);
+            pointer-events: none;
+            user-select: none;
+            letter-spacing: 1px;
+            transition: all 4s ease-in-out;
+        }
+
+        /* Admin Tab View */
+        #admin-view {
+            display: none;
+        }
+
+        .admin-table-wrap {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow-x: auto;
+            margin-top: 16px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            text-align: left;
+        }
+
+        th {
+            background: #111620;
+            padding: 12px 16px;
+            color: var(--text-sub);
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .badge-status {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-active { background: rgba(34, 197, 94, 0.2); color: #4ade80; }
+        .badge-locked { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+
+        @media (max-width: 600px) {
+            .movie-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">
+            🎬 <span>MN</span> CINEMA
+        </div>
+        <div class="nav-actions">
+            <span id="user-display" style="font-size: 0.85rem; color: var(--text-sub); display: none;"></span>
+            <button class="btn-outline" id="admin-nav-btn" style="display: none;" onclick="toggleAdminView()">⚙️ Админ самбар</button>
+            <button class="btn-outline" id="logout-btn" style="display: none;" onclick="logout()">Гарах</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- 1. НЭВТРЭХ ХЭСЭГ -->
+        <div id="auth-view">
+            <div class="auth-title">Тавтай морил</div>
+            <div class="auth-sub">Эрх авсан хэрэглэгчийн нэр, нууц үгээ оруулан нэвтэрнэ үү.</div>
+            
+            <div class="alert-box alert-error" id="login-error"></div>
+
+            <form onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label>Хэрэглэгчийн нэр</label>
+                    <input type="text" id="login-username" class="form-control" placeholder="Жишээ: bat_erdene" required>
+                </div>
+                <div class="form-group">
+                    <label>Нууц үг</label>
+                    <input type="password" id="login-password" class="form-control" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn-primary" style="width: 100%; margin-top: 8px;">Нэвтрэх</button>
+            </form>
+            <p style="font-size: 0.75rem; color: var(--text-sub); text-align: center; margin-top: 16px;">
+                ⚠️ Нэг хаягаар зөвхөн 1 төхөөрөмжөөс үзэх хамгаалалттай.
+            </p>
+        </div>
+
+        <!-- 2. ҮНДСЭН КИНО ХАРАХ ХЭСЭГ -->
+        <div id="main-view" style="display: none;">
+            <div class="section-header">
+                <div class="section-title">✨ Кино, Анимэ сан</div>
+            </div>
+            <div class="movie-grid" id="movie-grid">
+                <!-- Javascript-ээр динамикаар кинонууд орж ирнэ -->
+            </div>
+        </div>
+
+        <!-- 3. АДМИН ХЯНАЛТЫН САМБАР -->
+        <div id="admin-view">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="font-size: 1.4rem;">Админ удирдлагын төв</h2>
+                <button class="btn-outline" onclick="toggleAdminView()">← Кино сан руу буцах</button>
+            </div>
+
+            <!-- 1. ШИНЭ УХААЛАГ ЛИНК (MAGIC PASS) ҮҮСГЭХ ХЭСЭГ (ХАМГИЙН ЧУХАЛ) -->
+            <div style="background: linear-gradient(135deg, #1A1F2C, #131722); border: 1px solid #3B82F6; border-radius: 12px; padding: 22px; margin-bottom: 24px; box-shadow: 0 8px 24px rgba(59, 130, 246, 0.15);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <h3 style="font-size: 1.1rem; color: #60A5FA; display: flex; align-items: center; gap: 8px;">
+                        🔗 Ганц товшилтоор "Ухаалаг Линк" үүсгэх (Нэр, нууц үггүй)
+                    </h3>
+                </div>
+                <p style="font-size: 0.8rem; color: var(--text-sub); margin-bottom: 16px;">
+                    Хэрэглэгчид нэр нууц үг зохиох шаардлагагүй. Линкээ илгээхэд л анх орсон утсан дээр нь түгжигдэнэ.
+                </p>
+                <form id="create-pass-form" onsubmit="handleCreatePass(event)" style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 14px;">
+                    <div>
+                        <label style="font-size: 0.8rem; color: var(--text-sub); font-weight: 600;">Тэмдэглэл (Жишээ нь хэрэглэгчийн FB нэр)</label>
+                        <input type="text" id="new-pass-note" class="form-control" placeholder="Жишээ: Доржийн Бат (FB)" required>
+                    </div>
+                    <div>
+                        <label style="font-size: 0.8rem; color: var(--text-sub); font-weight: 600;">Үзэх хугацаа (Хоног)</label>
+                        <input type="number" id="new-pass-days" class="form-control" value="30" required>
+                    </div>
+                    <div style="display: flex; align-items: flex-end;">
+                        <button type="submit" class="btn-primary" style="width: 100%; height: 42px; background: #2563EB;">✨ Линк үүсгэх</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Үүсгэсэн Ухаалаг Линкүүдийн Хүснэгт -->
+            <h3 style="font-size: 1.1rem; margin-bottom: 8px;">🎫 Идэвхтэй Ухаалаг Линкүүд & Төхөөрөмжийн Түгжээ</h3>
+            <div class="admin-table-wrap" style="margin-bottom: 30px;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Хэрэглэгч / Тэмдэглэл</th>
+                            <th>Шууд орох Линк</th>
+                            <th>Хугацаа</th>
+                            <th>Түгжигдсэн төхөөрөмж</th>
+                            <th>Төлөв</th>
+                            <th>Үйлдэл</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-passes-tbody">
+                        <!-- Линкүүд энд жагсана -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Хэрэглэгчдийн жагсаалт ба төхөөрөмж хянах хүснэгт -->
+            <h3 style="font-size: 1.1rem; margin-bottom: 8px;">👥 Бүртгэлтэй хэрэглэгчид ба Төхөөрөмжийн төлөв</h3>
+            <div class="admin-table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Хэрэглэгчийн нэр</th>
+                            <th>Хугацаа дуусах</th>
+                            <th>Төхөөрөмжийн төлөв</th>
+                            <th>Сүүлийн идэвх</th>
+                            <th>Төлөв</th>
+                            <th>Үйлдэл</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-users-tbody">
+                        <!-- Хэрэглэгчид энд жагсана -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Шинэ кино нэмэх форм -->
+            <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-top: 30px;">
+                <h3 style="font-size: 1rem; margin-bottom: 14px;">🎬 Шинэ кино сан руу нэмэх</h3>
+                <form onsubmit="handleCreateMovie(event)" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+                    <div>
+                        <label style="font-size: 0.75rem; color: var(--text-sub);">Киноны нэр</label>
+                        <input type="text" id="new-movie-title" class="form-control" placeholder="Demon Slayer Season 1" required>
+                    </div>
+                    <div>
+                        <label style="font-size: 0.75rem; color: var(--text-sub);">Постер зураг (URL)</label>
+                        <input type="text" id="new-movie-poster" class="form-control" placeholder="https://...">
+                    </div>
+                    <div>
+                        <label style="font-size: 0.75rem; color: var(--text-sub);">Видео файлын холбоос (URL)</label>
+                        <input type="text" id="new-movie-url" class="form-control" placeholder="https://... эсвэл /video.mp4" required>
+                    </div>
+                    <div>
+                        <label style="font-size: 0.75rem; color: var(--text-sub);">Хугацаа</label>
+                        <input type="text" id="new-movie-duration" class="form-control" placeholder="2:14:00">
+                    </div>
+                    <div style="display: flex; align-items: flex-end;">
+                        <button type="submit" class="btn-primary" style="width: 100%;">Кино нэмэх</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. ВИДЕО ТОГЛУУЛАГЧ (SAFARI FULLSCREEN ДЭМЖИХ) -->
+    <div id="player-view">
+        <div class="player-header">
+            <button class="btn-outline" onclick="closePlayer()">✕ Хаах</button>
+            <div id="player-title" style="font-weight: 700; font-size: 1rem;"></div>
+            <div style="width: 60px;"></div>
+        </div>
+        <div class="player-container">
+            <video id="main-video" controls playsinline webkit-playsinline style="display: none;"></video>
+            <iframe id="main-iframe" src="" loading="lazy" style="border:0;position:absolute;top:0;height:100%;width:100%;display:none;" allow="accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture;" allowfullscreen="true"></iframe>
+            <!-- Динамик хөдөлгөөнт усан хээ (Watermark) хулгайлахаас хамгаална -->
+            <div class="dynamic-watermark" id="video-watermark">MN-USER</div>
+        </div>
+    </div>
+
+    <script>
+        // Төхөөрөмжийн онцгой ID үүсгэх / авах (Fingerprint)
+        function getDeviceId() {
+            let dId = localStorage.getItem('mn_device_id');
+            if (!dId) {
+                dId = 'DEV-' + Math.random().toString(36).substring(2, 10) + '-' + Date.now().toString(36);
+                localStorage.setItem('mn_device_id', dId);
+            }
+            return dId;
+        }
+
+        const API_URL = '';
+        let currentUser = null;
+
+        // 1. СИСТЕМД НЭВТРЭХ ШАЛГАЛТ (MAGIC PASS ДЭМЖИХ)
+        async function checkAuth() {
+            // Линкээр шууд орж ирсэн pass_key байгаа эсэхийг шалгах (?pass=...)
+            const urlParams = new URLSearchParams(window.location.search);
+            const passKey = urlParams.get('pass');
+
+            if (passKey) {
+                // Magic pass-аар шууд нэвтрэх үйлдэл хийнэ!
+                try {
+                    const res = await fetch('/api/pass-login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            pass_key: passKey,
+                            device_id: getDeviceId(),
+                            device_info: navigator.userAgent
+                        })
+                    });
+
+                    const data = await res.json();
+                    if (res.ok) {
+                        localStorage.setItem('mn_token', data.token);
+                        currentUser = data.user;
+                        // Линкийг цэвэрлэж харуулах
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                        showMainView();
+                        return;
+                    } else {
+                        alert(data.error);
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                    }
+                } catch (e) {
+                    alert('Холбогдоход алдаа гарлаа.');
+                }
+            }
+
+            const token = localStorage.getItem('mn_token');
+            if (!token) {
+                showAuthView();
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/me', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'X-Device-ID': getDeviceId()
+                    }
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    currentUser = data.user;
+                    showMainView();
+                } else {
+                    const err = await res.json();
+                    alert(err.error || 'Сесс дууссан байна.');
+                    logout();
+                }
+            } catch (e) {
+                showAuthView();
+            }
+        }
+
+        function showAuthView() {
+            document.getElementById('auth-view').style.display = 'block';
+            document.getElementById('main-view').style.display = 'none';
+            document.getElementById('admin-view').style.display = 'none';
+            document.getElementById('user-display').style.display = 'none';
+            document.getElementById('admin-nav-btn').style.display = 'none';
+            document.getElementById('logout-btn').style.display = 'none';
+        }
+
+        function showMainView() {
+            document.getElementById('auth-view').style.display = 'none';
+            document.getElementById('main-view').style.display = 'block';
+            document.getElementById('admin-view').style.display = 'none';
+
+            document.getElementById('user-display').style.display = 'inline';
+            document.getElementById('user-display').innerText = `👤 ${currentUser.name || currentUser.username}`;
+            document.getElementById('logout-btn').style.display = 'inline-block';
+
+            if (currentUser.is_admin) {
+                document.getElementById('admin-nav-btn').style.display = 'inline-block';
+            }
+
+            loadMovies();
+        }
+
+        // 2. НЭВТРЭХ ҮЙЛДЭЛ
+        async function handleLogin(e) {
+            e.preventDefault();
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+            const errBox = document.getElementById('login-error');
+            errBox.style.display = 'none';
+
+            try {
+                const res = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username,
+                        password,
+                        device_id: getDeviceId(),
+                        device_info: navigator.userAgent
+                    })
+                });
+
+                const data = await res.json();
+                if (res.ok) {
+                    localStorage.setItem('mn_token', data.token);
+                    currentUser = data.user;
+                    showMainView();
+                } else {
+                    errBox.innerText = data.error;
+                    errBox.style.display = 'block';
+                }
+            } catch (err) {
+                errBox.innerText = 'Сервертэй холбогдоход алдаа гарлаа.';
+                errBox.style.display = 'block';
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('mn_token');
+            currentUser = null;
+            showAuthView();
+        }
+
+        // 3. КИНОНУУД ТАТАХ БА ДЭЛГЭЦЭНД ГАРГАХ
+        async function loadMovies() {
+            const token = localStorage.getItem('mn_token');
+            const res = await fetch('/api/movies', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'X-Device-ID': getDeviceId()
+                }
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                const grid = document.getElementById('movie-grid');
+                grid.innerHTML = '';
+
+                if (data.movies.length === 0) {
+                    grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--text-sub); padding: 40px;">Одоогоор кино нэмэгдээгүй байна.</div>`;
+                    return;
+                }
+
+                data.movies.forEach(m => {
+                    const card = document.createElement('div');
+                    card.className = 'movie-card';
+                    card.onclick = () => playMovie(m.id);
+                    card.innerHTML = `
+                        <div class="poster-wrap">
+                            <img src="${m.poster_url || 'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=500'}" alt="${m.title}">
+                            <div class="duration-badge">${m.duration || 'Full HD'}</div>
+                        </div>
+                        <div class="movie-info">
+                            <div class="movie-title">${m.title}</div>
+                            <div class="movie-cat">${m.category}</div>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+            }
+        }
+
+        // 4. КИНО ТОГЛУУЛАХ (SAFARI + IPHONE FULLSCREEN ШИЙДЭЛТЭЙ)
+        let watermarkInterval = null;
+
+        async function playMovie(id) {
+            const token = localStorage.getItem('mn_token');
+            const res = await fetch(`/api/movie-stream?id=${id}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'X-Device-ID': getDeviceId()
+                }
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                const playerView = document.getElementById('player-view');
+                const video = document.getElementById('main-video');
+                const title = document.getElementById('player-title');
+                const watermark = document.getElementById('video-watermark');
+
+                title.innerText = data.movie.title;
+                watermark.innerText = data.watermark_text;
+
+                const iframe = document.getElementById('main-iframe');
+                if (data.movie.video_url.includes('mediadelivery.net') || data.movie.video_url.includes('iframe')) {
+                    video.style.display = 'none';
+                    iframe.style.display = 'block';
+                    iframe.src = data.movie.video_url + '?autoplay=true';
+                } else {
+                    iframe.style.display = 'none';
+                    video.style.display = 'block';
+                    video.src = data.movie.video_url;
+                    video.play();
+                }
+
+                playerView.style.display = 'flex';
+
+                // Хулгайлахаас сэргийлж watermark-ийг дэлгэцээр санамсаргүй хөдөлгөх
+                if (watermarkInterval) clearInterval(watermarkInterval);
+                watermarkInterval = setInterval(() => {
+                    const top = Math.floor(Math.random() * 80) + 10;
+                    const left = Math.floor(Math.random() * 70) + 10;
+                    watermark.style.top = `${top}%`;
+                    watermark.style.left = `${left}%`;
+                }, 8000);
+
+            } else {
+                const err = await res.json();
+                alert(err.error || 'Кино тоглуулах боломжгүй байна');
+                if (res.status === 401) logout();
+            }
+        }
+
+        function closePlayer() {
+            const playerView = document.getElementById('player-view');
+            const video = document.getElementById('main-video');
+            const iframe = document.getElementById('main-iframe');
+            video.pause();
+            video.src = '';
+            iframe.src = '';
+            playerView.style.display = 'none';
+            if (watermarkInterval) clearInterval(watermarkInterval);
+        }
+
+        // 5. АДМИН САМБАР СОЛИХ
+        function toggleAdminView() {
+            const mainView = document.getElementById('main-view');
+            const adminView = document.getElementById('admin-view');
+            if (adminView.style.display === 'none') {
+                mainView.style.display = 'none';
+                adminView.style.display = 'block';
+                loadAdminPasses();
+                loadAdminUsers();
+            } else {
+                adminView.style.display = 'none';
+                mainView.style.display = 'block';
+                loadMovies();
+            }
+        }
+
+        // 5.1 АДМИН: УХААЛАГ ЛИНК ҮҮСГЭХ
+        async function handleCreatePass(e) {
+            e.preventDefault();
+            const note = document.getElementById('new-pass-note').value;
+            const days = document.getElementById('new-pass-days').value;
+            const token = localStorage.getItem('mn_token');
+
+            const res = await fetch('/api/admin/passes/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                    'X-Device-ID': getDeviceId()
+                },
+                body: JSON.stringify({ note, days })
+            });
+
+            const data = await res.json();
+            if (res.ok) {
+                document.getElementById('create-pass-form').reset();
+                loadAdminPasses();
+                alert(`Линк амжилттай үүслээ! Та хүснэгтээс шууд "Хуулах" товчийг дарж хэрэглэгчдээ өгөөрэй.`);
+            } else {
+                alert(data.error);
+            }
+        }
+
+        // 5.2 АДМИН: БҮХ УХААЛАГ ЛИНКИЙГ ХАРАХ
+        async function loadAdminPasses() {
+            const token = localStorage.getItem('mn_token');
+            const res = await fetch('/api/admin/passes', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'X-Device-ID': getDeviceId()
+                }
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                const tbody = document.getElementById('admin-passes-tbody');
+                tbody.innerHTML = '';
+
+                data.passes.forEach(p => {
+                    const fullLink = `${window.location.origin}/?pass=${p.pass_key}`;
+                    const isLocked = !!p.locked_device_id;
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td><strong>${p.note}</strong></td>
+                        <td>
+                            <div style="display: flex; gap: 6px; align-items: center;">
+                                <input type="text" class="form-control" style="padding: 4px 8px; font-size: 0.75rem; width: 170px;" value="${fullLink}" readonly>
+                                <button class="btn-primary" style="padding: 4px 10px; font-size: 0.75rem;" onclick="copyLink('${fullLink}')">Хуулах</button>
+                            </div>
+                        </td>
+                        <td><small>${p.expires_at ? p.expires_at.split(' ')[0] : p.days + ' хоног'}</small></td>
+                        <td>
+                            <small style="color: ${isLocked ? '#60A5FA' : '#9CA3AF'}">
+                                ${isLocked ? '🔒 ' + (p.locked_device_info ? p.locked_device_info.substring(0, 25) + '...' : 'Түгжигдсэн') : 'Нээгдээгүй (Чөлөөтэй)'}
+                            </small>
+                        </td>
+                        <td>
+                            <span class="badge-status ${p.is_active ? 'badge-active' : 'badge-locked'}">
+                                ${p.is_active ? 'Идэвхтэй' : 'Хаагдсан'}
+                            </span>
+                        </td>
+                        <td>
+                            ${isLocked ? `<button class="btn-outline" style="padding: 3px 8px; font-size: 0.75rem;" onclick="resetPassDevice(${p.id})">Түгжээ тайлах</button>` : ''}
+                            <button class="btn-outline" style="padding: 3px 8px; font-size: 0.75rem; margin-left: 4px;" onclick="togglePassActive(${p.id})">
+                                ${p.is_active ? 'Хаах' : 'Нээх'}
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+        }
+
+        function copyLink(link) {
+            navigator.clipboard.writeText(link).then(() => {
+                alert('Линк амжилттай хуулагдлаа! FB чатаар шууд явуулж болно.');
+            });
+        }
+
+        async function resetPassDevice(passId) {
+            if (!confirm('Энэ линкийн төхөөрөмжийн түгжээг тайлах уу? Хэрэглэгч өөр шинэ утаснаас нэвтрэх боломжтой болно.')) return;
+            const token = localStorage.getItem('mn_token');
+            const res = await fetch('/api/admin/passes/reset-device', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                    'X-Device-ID': getDeviceId()
+                },
+                body: JSON.stringify({ pass_id: passId })
+            });
+            if (res.ok) {
+                alert('Түгжээ тайлагдлаа.');
+                loadAdminPasses();
+            }
+        }
+
+        async function togglePassActive(passId) {
+            const token = localStorage.getItem('mn_token');
+            const res = await fetch('/api/admin/passes/toggle-active', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                    'X-Device-ID': getDeviceId()
+                },
+                body: JSON.stringify({ pass_id: passId })
+            });
+            if (res.ok) {
+                loadAdminPasses();
+            }
+        }
+
+        // 6. АДМИН: ХЭРЭГЛЭГЧИД ТАТАХ
+        async function loadAdminUsers() {
+            const token = localStorage.getItem('mn_token');
+            const res = await fetch('/api/admin/users', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'X-Device-ID': getDeviceId()
+                }
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                const tbody = document.getElementById('admin-users-tbody');
+                tbody.innerHTML = '';
+
+                data.users.forEach(u => {
+                    const tr = document.createElement('tr');
+                    const hasDevice = !!u.current_device_id;
+                    tr.innerHTML = `
+                        <td><strong>${u.username}</strong></td>
+                        <td><small>${u.expires_at || 'Хугацаагүй'}</small></td>
+                        <td>
+                            <small style="color: ${hasDevice ? '#60a5fa' : 'var(--text-sub)'}">
+                                ${u.last_device_info ? u.last_device_info.substring(0, 30) + '...' : 'Төхөөрөмж холбогдоогүй'}
+                            </small>
+                        </td>
+                        <td><small>${u.last_active_at || '-'}</small></td>
+                        <td>
+                            <span class="badge-status ${u.is_active ? 'badge-active' : 'badge-locked'}">
+                                ${u.is_active ? 'Идэвхтэй' : 'Хаагдсан'}
+                            </span>
+                        </td>
+                        <td>
+                            <button class="btn-outline" style="padding: 4px 8px; font-size: 0.75rem;" onclick="resetDevice(${u.id})">Төхөөрөмж салгах</button>
+                            <button class="btn-outline" style="padding: 4px 8px; font-size: 0.75rem; margin-left: 4px;" onclick="toggleUserActive(${u.id})">
+                                ${u.is_active ? 'Хаах' : 'Нээх'}
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+        }
+
+        // Шинэ хэрэглэгч үүсгэх
+        async function handleCreateUser(e) {
+            e.preventDefault();
+            const username = document.getElementById('new-user-username').value;
+            const password = document.getElementById('new-user-pw').value;
+            const days = document.getElementById('new-user-days').value;
+
+            const token = localStorage.getItem('mn_token');
+            const res = await fetch('/api/admin/users/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                    'X-Device-ID': getDeviceId()
+                },
+                body: JSON.stringify({ username, password, days })
+            });
+
+            const data = await res.json();
+            if (res.ok) {
+                alert(data.message);
+                document.getElementById('create-user-form').reset();
+                loadAdminUsers();
+            } else {
+                alert(data.error);
+            }
+        }
+
+        // Хэрэглэгчийн төхөөрөмж салгах
+        async function resetDevice(userId) {
+            if (!confirm('Энэ хэрэглэгчийн одоо холбогдсон төхөөрөмжийг салгах уу?')) return;
+            const token = localStorage.getItem('mn_token');
+            const res = await fetch('/api/admin/users/reset-device', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                    'X-Device-ID': getDeviceId()
+                },
+                body: JSON.stringify({ user_id: userId })
+            });
+            if (res.ok) {
+                alert('Төхөөрөмж салгагдлаа.');
+                loadAdminUsers();
+            }
+        }
+
+        // Хэрэглэгч хаах / нээх
+        async function toggleUserActive(userId) {
+            const token = localStorage.getItem('mn_token');
+            const res = await fetch('/api/admin/users/toggle-active', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                    'X-Device-ID': getDeviceId()
+                },
+                body: JSON.stringify({ user_id: userId })
+            });
+            if (res.ok) {
+                loadAdminUsers();
+            }
+        }
+
+        // Кино нэмэх
+        async function handleCreateMovie(e) {
+            e.preventDefault();
+            const title = document.getElementById('new-movie-title').value;
+            const poster_url = document.getElementById('new-movie-poster').value;
+            const video_url = document.getElementById('new-movie-url').value;
+            const duration = document.getElementById('new-movie-duration').value;
+
+            const token = localStorage.getItem('mn_token');
+            const res = await fetch('/api/admin/movies/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                    'X-Device-ID': getDeviceId()
+                },
+                body: JSON.stringify({ title, poster_url, video_url, duration })
+            });
+
+            const data = await res.json();
+            if (res.ok) {
+                alert(data.message);
+                toggleAdminView();
+            } else {
+                alert(data.error);
+            }
+        }
+
+        // Хуудас ачаалагдахад шалгах
+        checkAuth();
+    </script>
+</body>
+</html>
