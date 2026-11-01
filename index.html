@@ -140,8 +140,8 @@
 
         .movie-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-            gap: 22px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
             margin-top: 20px;
         }
 
@@ -153,6 +153,8 @@
             cursor: pointer;
             transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
             position: relative;
+            display: flex;
+            flex-direction: column;
         }
 
         .movie-card:hover {
@@ -186,9 +188,9 @@
             right: 8px;
             background: rgba(0,0,0,0.8);
             backdrop-filter: blur(4px);
-            font-size: 0.75rem;
+            font-size: 0.72rem;
             font-weight: 600;
-            padding: 3px 6px;
+            padding: 2px 6px;
             border-radius: 4px;
         }
 
@@ -198,7 +200,7 @@
             left: 8px;
             font-size: 0.75rem;
             font-weight: 700;
-            padding: 4px 8px;
+            padding: 3px 7px;
             border-radius: 6px;
             backdrop-filter: blur(4px);
         }
@@ -214,10 +216,93 @@
             border: 1px solid #334155;
         }
 
-        .movie-info { padding: 14px; }
-        .movie-title { font-weight: 700; font-size: 1rem; margin-bottom: 4px; line-height: 1.3; }
-        .movie-cat { color: var(--text-sub); font-size: 0.8rem; margin-bottom: 6px; }
-        .movie-time-left { font-size: 0.78rem; font-weight: 600; }
+        .movie-info {
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .movie-title {
+            font-weight: 700;
+            font-size: 0.95rem;
+            margin-bottom: 4px;
+            line-height: 1.3;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            min-height: 2.6em;
+            word-break: break-word;
+        }
+
+        .movie-cat {
+            color: var(--text-sub);
+            font-size: 0.78rem;
+            margin-bottom: 6px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .movie-time-left {
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-top: auto;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 12px 8px;
+            }
+            .movie-grid {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 6px;
+                margin-top: 12px;
+            }
+            .movie-card {
+                border-radius: 8px;
+            }
+            .poster-wrap {
+                aspect-ratio: 2/3;
+            }
+            .movie-info {
+                padding: 6px 3px 5px;
+            }
+            .movie-title {
+                font-size: 0.68rem;
+                font-weight: 700;
+                line-height: 1.2;
+                margin-bottom: 2px;
+                min-height: 2.4em;
+                -webkit-line-clamp: 2;
+            }
+            .movie-cat {
+                display: none;
+            }
+            .movie-time-left {
+                font-size: 0.6rem;
+                font-weight: 600;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .duration-badge {
+                font-size: 0.55rem;
+                padding: 1px 3px;
+                bottom: 3px;
+                right: 3px;
+                border-radius: 3px;
+            }
+            .access-badge {
+                font-size: 0.55rem;
+                font-weight: 700;
+                padding: 2px 4px;
+                top: 3px;
+                left: 3px;
+                border-radius: 3px;
+            }
+        }
 
         #player-view {
             display: none;
@@ -827,7 +912,7 @@
 
                 if (currentUser.isAdmin) {
                     hasAccess = true;
-                    daysLeftText = 'Админ эрхтэй';
+                    daysLeftText = 'Админ';
                 } else if (currentPass && currentPass.access && currentPass.access[m.id]) {
                     const acc = currentPass.access[m.id];
                     if (acc.expiresAt) {
@@ -835,17 +920,17 @@
                         const daysLeft = Math.ceil(diff / (1000 * 60 * 60 * 24));
                         if (daysLeft > 0) {
                             hasAccess = true;
-                            daysLeftText = `🟢 ${daysLeft} хоног үлдсэн`;
+                            daysLeftText = `🟢 ${daysLeft} хоног`;
                         } else {
                             isExpired = true;
-                            daysLeftText = `⌛ Хугацаа дууссан`;
+                            daysLeftText = `⌛ Дууссан`;
                         }
                     } else {
                         hasAccess = true;
-                        daysLeftText = `🟢 ${acc.days || 30} хоног эрхтэй`;
+                        daysLeftText = `🟢 ${acc.days || 30} хоног`;
                     }
                 } else {
-                    daysLeftText = '🔒 Эрх аваагүй';
+                    daysLeftText = '🔒 Эрхгүй';
                 }
 
                 const card = document.createElement('div');
@@ -866,7 +951,7 @@
                         <img src="${m.poster_url}" alt="${m.title}" onerror="this.src='https://via.placeholder.com/300x450?text=No+Poster'">
                         <div class="duration-badge">${m.duration || 'Full HD'}</div>
                         <div class="access-badge ${hasAccess ? 'badge-unlocked' : 'badge-locked-overlay'}">
-                            ${hasAccess ? 'Үзэх боломжтой' : 'Түгжээтэй'}
+                            ${hasAccess ? 'Үзэх' : 'Түгжээтэй'}
                         </div>
                     </div>
                     <div class="movie-info">
