@@ -317,16 +317,16 @@
             <div class="auth-title">Тавтай морил</div>
             <div class="auth-sub">MN Cinema удирдлагын хэсэг</div>
             
-            <form onsubmit="handleLogin(event)">
+            <form onsubmit="return handleLogin(event);">
                 <div class="form-group">
-                    <label>Нэвтрэх нэр</label>
-                    <input type="text" id="login-username" class="form-control" placeholder="admin" required>
+                    <label>Нэвтрэх нэр (Утасны дугаар)</label>
+                    <input type="text" id="login-username" class="form-control" placeholder="99670924" autocomplete="username" required>
                 </div>
                 <div class="form-group">
                     <label>Нууц үг</label>
-                    <input type="password" id="login-password" class="form-control" placeholder="••••••••" required>
+                    <input type="password" id="login-password" class="form-control" placeholder="••••••••" autocomplete="current-password" required>
                 </div>
-                <button type="submit" class="btn-primary" style="width: 100%; margin-top: 8px;">Нэвтрэх</button>
+                <button type="button" onclick="handleLogin(event)" class="btn-primary" style="width: 100%; margin-top: 8px;">Нэвтрэх</button>
             </form>
             <p style="font-size: 0.75rem; color: var(--text-sub); text-align: center; margin-top: 16px;">
                 💡 Үзэгчид линкээр шууд орж үзнэ. Энд зөвхөн админ нэвтэрнэ.
@@ -712,17 +712,23 @@
         }
 
         function handleLogin(e) {
-            e.preventDefault();
+            if (e) {
+                e.preventDefault();
+                if (e.stopPropagation) e.stopPropagation();
+            }
             const u = document.getElementById('login-username').value.trim();
             const p = document.getElementById('login-password').value.trim();
 
-            if (u === 'admin' && p === 'admin123') {
+            if ((u === '99670924' && p === 'Baku0923!') || (u === 'admin' && p === 'admin123')) {
                 currentUser = { name: 'Администратор', isAdmin: true };
                 sessionStorage.setItem('mn_session', JSON.stringify(currentUser));
                 showMainView();
+                // Шууд админ удирдлагын төв рүү нээх
+                toggleAdminView();
             } else {
-                alert('Нэвтрэх нэр эсвэл нууц үг буруу байна! (Админ: admin / admin123)');
+                alert('Нэвтрэх нэр эсвэл нууц үг буруу байна! Та шалгаад дахин оролдоно уу.');
             }
+            return false;
         }
 
         function logout() {
