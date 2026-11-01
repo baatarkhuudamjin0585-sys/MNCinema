@@ -319,8 +319,8 @@
             
             <form onsubmit="return handleLogin(event);">
                 <div class="form-group">
-                    <label>Нэвтрэх нэр (Утасны дугаар)</label>
-                    <input type="text" id="login-username" class="form-control" placeholder="99670924" autocomplete="username" required>
+                    <label>Нэвтрэх нэр</label>
+                    <input type="text" id="login-username" class="form-control" placeholder="Хэрэглэгчийн нэр" autocomplete="username" required>
                 </div>
                 <div class="form-group">
                     <label>Нууц үг</label>
@@ -711,7 +711,7 @@
             }
         }
 
-        function handleLogin(e) {
+        async function handleLogin(e) {
             if (e) {
                 e.preventDefault();
                 if (e.stopPropagation) e.stopPropagation();
@@ -719,14 +719,23 @@
             const u = document.getElementById('login-username').value.trim();
             const p = document.getElementById('login-password').value.trim();
 
-            if ((u === '99670924' && p === 'Baku0923!') || (u === 'admin' && p === 'admin123')) {
-                currentUser = { name: 'Администратор', isAdmin: true };
-                sessionStorage.setItem('mn_session', JSON.stringify(currentUser));
-                showMainView();
-                // Шууд админ удирдлагын төв рүү нээх
-                toggleAdminView();
-            } else {
-                alert('Нэвтрэх нэр эсвэл нууц үг буруу байна! Та шалгаад дахин оролдоно уу.');
+            try {
+                const combined = `${u}:${p}`;
+                const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(combined));
+                const hash = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+
+                if (hash === '0b7f4d6628c1cd39fcbb747cfe1317052461d7a73847a84168f28ab2205e7947' || 
+                    hash === 'bf6b5bdb74c79ece9fc0ad0ac9fb0359f9555d4f35a83b2e6ec69ae99e09603d') {
+                    currentUser = { name: 'Администратор', isAdmin: true };
+                    sessionStorage.setItem('mn_session', JSON.stringify(currentUser));
+                    showMainView();
+                    // Шууд админ удирдлагын төв рүү нээх
+                    toggleAdminView();
+                } else {
+                    alert('Нэвтрэх нэр эсвэл нууц үг буруу байна! Та шалгаад дахин оролдоно уу.');
+                }
+            } catch (err) {
+                console.error(err);
             }
             return false;
         }
