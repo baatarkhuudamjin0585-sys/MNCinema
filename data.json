@@ -19,20 +19,6 @@
   ],
   "passes": [
     {
-      "id": 1793541117436,
-      "key": "pass_y5cjtm3",
-      "note": "Batdorj",
-      "lockedDeviceId": "DEV-hztqh3tg-mvxqgiim",
-      "deviceInfo": "iPhone",
-      "isActive": true,
-      "access": {
-        "movie_1793539149178": {
-          "days": 30,
-          "expiresAt": "2026-12-01T13:54:20.673Z"
-        }
-      }
-    },
-    {
       "id": 1793539585595,
       "key": "pass_xcq53jp",
       "note": "Баатархүү",
