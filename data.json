@@ -17,20 +17,5 @@
       "video_url": "https://player.mediadelivery.net/play/796263/42677ba9-9a48-424b-a289-828620ea3eb2"
     }
   ],
-  "passes": [
-    {
-      "id": 1793544231412,
-      "key": "pass_rmpi1hu",
-      "note": "Test 1",
-      "lockedDeviceId": null,
-      "deviceInfo": null,
-      "isActive": true,
-      "access": {
-        "movie_1793539906531": {
-          "days": 15,
-          "expiresAt": "2026-11-16T14:44:06.455Z"
-        }
-      }
-    }
-  ]
+  "passes": []
 }
