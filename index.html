@@ -97,7 +97,21 @@
             padding: 20px;
         }
 
+        .spinner {
+            width: 44px;
+            height: 44px;
+            border: 3.5px solid rgba(229, 9, 20, 0.15);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.75s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
         #auth-view {
+            display: none;
             max-width: 400px;
             margin: 60px auto;
             background: var(--bg-card);
@@ -312,6 +326,30 @@
     </header>
 
     <div class="container">
+        <!-- АЧААЛАХ ХЭСЭГ (СПИННЕР) -->
+        <div id="loading-view" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 55vh;">
+            <div class="spinner"></div>
+            <p style="margin-top: 18px; color: var(--text-sub); font-size: 0.95rem; font-weight: 500;">MN Cinema ачаалж байна...</p>
+        </div>
+
+        <!-- ОЛОН НИЙТЭД ЗОРИУЛСАН ЭХЛЭЛ ХУУДАС (Линкгүй орсон үед) -->
+        <div id="welcome-view" style="display: none; max-width: 520px; margin: 70px auto; background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 40px 32px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.5);">
+            <div style="font-size: 3rem; margin-bottom: 14px;">🎬</div>
+            <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 10px; color: #fff;">MN CINEMA</h2>
+            <p style="font-size: 0.95rem; color: var(--text-sub); line-height: 1.6; margin-bottom: 24px;">
+                Монгол дуу оруулалттай шилдэг кинонуудын сан.<br>
+                Энэхүү платформ нь зөвхөн эрх олгогдсон үзэгчдийн <b>Ухаалаг линкээр</b> шууд нээгдэнэ.
+            </p>
+            <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border); border-radius: 10px; padding: 14px; font-size: 0.85rem; color: #94A3B8; line-height: 1.5; margin-bottom: 24px;">
+                💡 Хэрэв та үзэх эрх авсан бол өөрт ирсэн линкээрээ шууд нэвтэрнэ үү.
+            </div>
+            <div style="border-top: 1px solid var(--border); padding-top: 16px;">
+                <a href="javascript:void(0)" onclick="showAuthView()" style="color: #64748B; font-size: 0.8rem; text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='#94A3B8'" onmouseout="this.style.color='#64748B'">
+                    ⚙️ Админ нэвтрэх
+                </a>
+            </div>
+        </div>
+
         <!-- ТҮГЖИГДСЭН ДЭЛГЭЦ (ЗӨВХӨН ҮЗЭГЧДЭД) -->
         <div id="locked-view" style="display: none; max-width: 460px; margin: 80px auto; background: var(--bg-card); border: 1px solid rgba(239, 68, 68, 0.4); border-radius: 16px; padding: 40px 28px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.6);">
             <div style="font-size: 3.5rem; margin-bottom: 16px;">🔒</div>
@@ -324,9 +362,9 @@
             </div>
         </div>
 
-        <!-- НЭВТРЭХ ХЭСЭГ (АДМИН) -->
-        <div id="auth-view">
-            <div class="auth-title">Тавтай морил</div>
+        <!-- НЭВТРЭХ ХЭСЭГ (ЗӨВХӨН АДМИН) -->
+        <div id="auth-view" style="display: none;">
+            <div class="auth-title">Админ нэвтрэх</div>
             <div class="auth-sub">MN Cinema удирдлагын хэсэг</div>
             
             <div id="login-box">
@@ -339,6 +377,7 @@
                     <input type="password" id="login-password" class="form-control" placeholder="••••••••" onkeydown="if(event.key==='Enter')handleLogin()">
                 </div>
                 <button type="button" onclick="handleLogin()" class="btn-primary" style="width: 100%; margin-top: 8px;">Нэвтрэх</button>
+                <button type="button" onclick="showWelcomeView()" class="btn-outline" style="width: 100%; margin-top: 10px;">← Буцах</button>
             </div>
             <p style="font-size: 0.75rem; color: var(--text-sub); text-align: center; margin-top: 16px;">
                 💡 Үзэгчид линкээр шууд орж үзнэ. Энд зөвхөн админ нэвтэрнэ.
@@ -609,13 +648,81 @@
             }
         }
 
+        // ДЭЛГЭЦИЙН ШИЛЖИЛТҮҮД
+        function hideAllViews() {
+            const views = ['loading-view', 'welcome-view', 'locked-view', 'auth-view', 'main-view', 'admin-view'];
+            views.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.style.display = 'none';
+            });
+            const userDisp = document.getElementById('user-display');
+            if (userDisp) userDisp.style.display = 'none';
+            const admBtn = document.getElementById('admin-nav-btn');
+            if (admBtn) admBtn.style.display = 'none';
+            const logBtn = document.getElementById('logout-btn');
+            if (logBtn) logBtn.style.display = 'none';
+        }
+
+        function showLoading() {
+            hideAllViews();
+            const el = document.getElementById('loading-view');
+            if (el) el.style.display = 'flex';
+        }
+
+        function showWelcomeView() {
+            hideAllViews();
+            const el = document.getElementById('welcome-view');
+            if (el) el.style.display = 'block';
+        }
+
+        function showAuthView() {
+            hideAllViews();
+            const el = document.getElementById('auth-view');
+            if (el) el.style.display = 'block';
+        }
+
+        function showLockedView(title, msg) {
+            hideAllViews();
+            if (title) document.getElementById('locked-title').innerText = title;
+            if (msg) document.getElementById('locked-message').innerText = msg;
+            const lv = document.getElementById('locked-view');
+            if (lv) lv.style.display = 'block';
+        }
+
+        function showMainView() {
+            hideAllViews();
+            const mv = document.getElementById('main-view');
+            if (mv) mv.style.display = 'block';
+
+            if (currentUser) {
+                const userDisp = document.getElementById('user-display');
+                if (userDisp) {
+                    userDisp.style.display = 'inline';
+                    userDisp.innerText = `👤 ${currentUser.name}`;
+                }
+                const logBtn = document.getElementById('logout-btn');
+                if (logBtn) logBtn.style.display = 'inline-block';
+
+                if (currentUser.isAdmin) {
+                    const admBtn = document.getElementById('admin-nav-btn');
+                    if (admBtn) admBtn.style.display = 'inline-block';
+                    document.getElementById('catalog-title').innerText = '✨ Бүх кино сан (Админ харагдац)';
+                } else {
+                    document.getElementById('catalog-title').innerText = `👋 Сайн байна уу, ${currentUser.name}!`;
+                }
+            }
+
+            renderMovies();
+        }
+
         // СИСТЕМИЙГ ЭХЛҮҮЛЭХ
         async function initApp() {
             const urlParams = new URLSearchParams(window.location.search);
             const passKey = urlParams.get('pass');
 
+            // 1. ХЭРЭГЛЭГЧИЙН УХААЛАГ ЛИНКЭЭР ОРЖ БАЙГАА БОЛ
             if (passKey) {
-                // ХЭРЭГЛЭГЧИЙГ СЕРВЕР ТАЛД БАТАЛГААЖУУЛЖ ТӨХӨӨРӨМЖ ТҮГЖИХ!
+                showLoading(); // Ачаалах дэлгэц харуулна (Админ нэвтрэх хэсэг ОГТ ХАРАГДАХГҮЙ)
                 const myDevice = getDeviceId();
                 const deviceInfo = (navigator.userAgent.includes('iPhone') ? 'iPhone' : 
                                    navigator.userAgent.includes('Android') ? 'Android' : 'Компьютер');
@@ -648,17 +755,30 @@
                 }
             }
 
-            await loadData();
-
+            // 2. ӨМНӨ НЭВТЭРСЭН SESSION БАЙГАА ЭСЭХ
             const sess = sessionStorage.getItem('mn_session');
             if (sess) {
-                currentUser = JSON.parse(sess);
-                if (!currentUser.isAdmin && currentUser.passKey) {
-                    currentPass = (appData.passes || []).find(p => p.key === currentUser.passKey);
+                showLoading();
+                await loadData();
+                try {
+                    currentUser = JSON.parse(sess);
+                    if (!currentUser.isAdmin && currentUser.passKey) {
+                        currentPass = (appData.passes || []).find(p => p.key === currentUser.passKey);
+                    }
+                    showMainView();
+                    return;
+                } catch (e) {
+                    console.warn(e);
                 }
-                showMainView();
-            } else {
+            }
+
+            // 3. АДМИН ЭСВЭЛ ЭХЛЭЛ ХУУДАС
+            // Зөвхөн админ линкээр (?admin=1 эсвэл /admin) орсон бол админ нэвтрэх хэсэг гарна
+            const isAdminRoute = urlParams.has('admin') || window.location.pathname.endsWith('/admin');
+            if (isAdminRoute) {
                 showAuthView();
+            } else {
+                showWelcomeView();
             }
         }
 
@@ -690,51 +810,7 @@
             sessionStorage.removeItem('mn_session');
             currentUser = null;
             currentPass = null;
-            showAuthView();
-        }
-
-        function showLockedView(title, msg) {
-            document.getElementById('auth-view').style.display = 'none';
-            document.getElementById('main-view').style.display = 'none';
-            document.getElementById('admin-view').style.display = 'none';
-            document.getElementById('user-display').style.display = 'none';
-            document.getElementById('admin-nav-btn').style.display = 'none';
-            document.getElementById('logout-btn').style.display = 'none';
-
-            const lv = document.getElementById('locked-view');
-            if (title) document.getElementById('locked-title').innerText = title;
-            if (msg) document.getElementById('locked-message').innerText = msg;
-            lv.style.display = 'block';
-        }
-
-        function showAuthView() {
-            document.getElementById('locked-view').style.display = 'none';
-            document.getElementById('auth-view').style.display = 'block';
-            document.getElementById('main-view').style.display = 'none';
-            document.getElementById('admin-view').style.display = 'none';
-            document.getElementById('user-display').style.display = 'none';
-            document.getElementById('admin-nav-btn').style.display = 'none';
-            document.getElementById('logout-btn').style.display = 'none';
-        }
-
-        function showMainView() {
-            document.getElementById('locked-view').style.display = 'none';
-            document.getElementById('auth-view').style.display = 'none';
-            document.getElementById('main-view').style.display = 'block';
-            document.getElementById('admin-view').style.display = 'none';
-
-            document.getElementById('user-display').style.display = 'inline';
-            document.getElementById('user-display').innerText = `👤 ${currentUser.name}`;
-            document.getElementById('logout-btn').style.display = 'inline-block';
-
-            if (currentUser.isAdmin) {
-                document.getElementById('admin-nav-btn').style.display = 'inline-block';
-                document.getElementById('catalog-title').innerText = '✨ Бүх кино сан (Админ харагдац)';
-            } else {
-                document.getElementById('catalog-title').innerText = `👋 Сайн байна уу, ${currentUser.name}!`;
-            }
-
-            renderMovies();
+            window.location.href = window.location.pathname;
         }
 
         function renderMovies() {
