@@ -22,13 +22,13 @@
       "id": 1793544436854,
       "key": "pass_ggrgdnm",
       "note": "Test",
-      "lockedDeviceId": null,
-      "deviceInfo": null,
+      "lockedDeviceId": "DEV-hmqorm1-mvxv6mgd",
+      "deviceInfo": "iPhone",
       "isActive": true,
       "access": {
         "movie_1793539906531": {
           "days": 15,
-          "expiresAt": null
+          "expiresAt": "2026-11-16T14:47:34.958Z"
         }
       }
     }
