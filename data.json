@@ -31,21 +31,6 @@
           "expiresAt": null
         }
       }
-    },
-    {
-      "id": 1730460000000,
-      "key": "pass_qz9cgymo",
-      "note": "Бат (Туршилт)",
-      "lockedDeviceId": null,
-      "deviceInfo": null,
-      "isActive": true,
-      "access": {
-        "movie_1": {
-          "days": 30,
-          "activatedAt": null,
-          "expiresAt": null
-        }
-      }
     }
   ]
 }
