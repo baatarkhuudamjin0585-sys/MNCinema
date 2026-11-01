@@ -406,45 +406,67 @@
             const passKey = urlParams.get('pass');
 
             if (passKey) {
-                // MAGIC PASS ШАЛГАЛТ
-                const passes = getStoredPasses();
-                const pass = passes.find(x => x.key === passKey);
+                let noteName = 'Үзэгч (Эрхтэй)';
+                let isValidPass = false;
 
-                if (!pass) {
-                    alert('Энэ ухаалаг линк хүчингүй эсвэл бүртгэлгүй байна.');
-                    window.history.replaceState({}, document.title, window.location.pathname);
-                } else if (!pass.isActive) {
-                    alert('Энэ линкийн эрхийг хаасан байна.');
-                    window.history.replaceState({}, document.title, window.location.pathname);
-                } else {
-                    const myDevice = getDeviceId();
-                    const now = new Date();
+                // 1. Хэрэв self-contained mn_ код бол
+                if (passKey.startsWith('mn_')) {
+                    try {
+                        const raw = decodeURIComponent(atob(passKey.substring(3)));
+                        const pData = JSON.parse(raw);
+                        const now = Date.now();
+                        const expireMs = pData.created + (pData.days * 24 * 60 * 60 * 1000);
 
-                    if (!pass.lockedDeviceId) {
-                        // Анхны төхөөрөмж дээр түгжих
-                        pass.lockedDeviceId = myDevice;
-                        pass.deviceInfo = navigator.userAgent.substring(0, 35) + '...';
-                        pass.activatedAt = now.toISOString();
-                        const exp = new Date(now.getTime() + (pass.days * 24 * 60 * 60 * 1000));
-                        pass.expiresAt = exp.toISOString().split('T')[0];
-                        savePasses(passes);
+                        if (now > expireMs) {
+                            alert('⌛ Энэхүү үзэх эрхийн хугацаа (' + pData.days + ' хоног) дууссан байна.');
+                            showAuthView();
+                            return;
+                        }
 
-                        currentUser = { name: pass.note, isAdmin: false };
-                        sessionStorage.setItem('mn_session', JSON.stringify(currentUser));
-                        window.history.replaceState({}, document.title, window.location.pathname);
-                        showMainView();
-                        return;
-                    } else if (pass.lockedDeviceId !== myDevice) {
-                        alert('🔒 АНХААРУУЛГА: Энэ линк анх нээгдсэн өөр төхөөрөмж дээр аль хэдийн түгжигдсэн байна! Бусад төхөөрөмжөөс үзэх боломжгүй.');
-                        window.history.replaceState({}, document.title, window.location.pathname);
-                    } else {
-                        // Түгжигдсэн зөв төхөөрөмж мөн
-                        currentUser = { name: pass.note, isAdmin: false };
-                        sessionStorage.setItem('mn_session', JSON.stringify(currentUser));
-                        window.history.replaceState({}, document.title, window.location.pathname);
-                        showMainView();
-                        return;
+                        // Төхөөрөмж шалгах
+                        const myDevice = getDeviceId();
+                        const boundKey = 'mn_lock_' + pData.id;
+                        let boundDev = localStorage.getItem(boundKey);
+
+                        if (!boundDev) {
+                            localStorage.setItem(boundKey, myDevice);
+                        } else if (boundDev !== myDevice) {
+                            alert('🔒 АНХААРУУЛГА: Энэ эрх өөр анхны төхөөрөмж дээр аль хэдийн идэвхжсэн байна! Бусад төхөөрөмжөөс үзэх боломжгүй.');
+                            showAuthView();
+                            return;
+                        }
+
+                        noteName = pData.note || 'Үзэгч';
+                        isValidPass = true;
+                    } catch (err) {
+                        console.error('Invalid token format', err);
                     }
+                } else if (passKey.startsWith('pass_')) {
+                    // Түрүүний туршилтын линкүүд болон энгийн линкүүд
+                    const passes = getStoredPasses();
+                    const p = passes.find(x => x.key === passKey);
+                    if (p) {
+                        noteName = p.note;
+                    }
+                    isValidPass = true;
+                }
+
+                if (isValidPass) {
+                    // ХЭРЭГЛЭГЧИД ЯМАР Ч НЭВТРЭХ ЦОНХ ХАРУУЛАХГҮЙ!
+                    currentUser = { name: noteName, isAdmin: false };
+                    sessionStorage.setItem('mn_session', JSON.stringify(currentUser));
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                    showMainView();
+
+                    // ШУУД КИНОГ НЭЭЖ ТОГЛУУЛНА!
+                    const movies = getStoredMovies();
+                    if (movies && movies.length > 0) {
+                        playMovie(movies[0]);
+                    }
+                    return;
+                } else {
+                    alert('Энэ ухаалаг линк хүчингүй байна.');
+                    window.history.replaceState({}, document.title, window.location.pathname);
                 }
             }
 
@@ -559,12 +581,21 @@
         // ЛИНК ҮҮСГЭХ
         function handleCreatePass(e) {
             e.preventDefault();
-            const note = document.getElementById('new-pass-note').value.trim();
+            const note = document.getElementById('new-pass-note').value.trim() || 'Үзэгч';
             const days = parseInt(document.getElementById('new-pass-days').value) || 30;
 
-            const newPass = {
+            const payload = {
                 id: Date.now(),
-                key: 'pass_' + Math.random().toString(36).substring(2, 10),
+                note: note,
+                days: days,
+                created: Date.now()
+            };
+            // Бүрэн бие даасан token үүсгэх (Хэрэглэгч линкээр шууд кино үзнэ)
+            const token = 'mn_' + btoa(encodeURIComponent(JSON.stringify(payload)));
+
+            const newPass = {
+                id: payload.id,
+                key: token,
                 note: note,
                 days: days,
                 lockedDeviceId: null,
@@ -579,7 +610,7 @@
 
             document.getElementById('new-pass-note').value = '';
             renderPasses();
-            alert('Ухаалаг линк амжилттай үүслээ! Та хүснэгтээс "Хуулах" дарж хэрэглэгчдээ өгөөрэй.');
+            alert('Ухаалаг линк амжилттай үүслээ! Хэрэглэгч рүү хуулж илгээхэд шууд кино гарч эхэлнэ.');
         }
 
         function renderPasses() {
