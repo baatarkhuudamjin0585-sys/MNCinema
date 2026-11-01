@@ -415,9 +415,31 @@
                 </table>
             </div>
 
-            <!-- Шинэ Кино Санд Нэмэх Форм -->
+            <!-- Санд бүртгэлтэй кинонууд (Засах, Устгах) -->
             <div style="margin-top: 36px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 22px;">
-                <h3 style="font-size: 1.1rem; margin-bottom: 16px;">🎬 Санд шинэ кино нэмэх</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <h3 style="font-size: 1.15rem; color: #F3F4F6;">🎬 Санд байгаа бүх кинонууд</h3>
+                    <span style="font-size: 0.8rem; color: var(--text-sub);" id="admin-movie-count">Нийт: 0 кино</span>
+                </div>
+                <div class="admin-table-wrap" style="margin-top: 0;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 70px;">Постер</th>
+                                <th>Киноны нэр</th>
+                                <th>Төрөл / Хугацаа</th>
+                                <th>Bunny Embed URL</th>
+                                <th style="width: 160px;">Үйлдэл</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-movies-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Шинэ Кино Санд Нэмэх Форм -->
+            <div style="margin-top: 24px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 22px;">
+                <h3 style="font-size: 1.1rem; margin-bottom: 16px;">➕ Санд цоо шинэ кино нэмэх</h3>
                 <form onsubmit="handleCreateMovie(event)" style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 14px;">
                     <div class="form-group" style="grid-column: span 3;">
                         <label>Киноны нэр</label>
@@ -449,6 +471,46 @@
         </div>
         <div class="player-container">
             <iframe id="main-iframe" src="" allow="accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture;" allowfullscreen="true"></iframe>
+        </div>
+    </div>
+
+    <!-- КИНО ЗАСАХ MODAL -->
+    <div class="modal-overlay" id="edit-movie-modal">
+        <div class="modal-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 style="font-size: 1.15rem; color: #60A5FA;">✏️ Киноны мэдээлэл засах</h3>
+                <button class="btn-outline" style="padding: 2px 8px;" onclick="closeEditMovieModal()">✕</button>
+            </div>
+            
+            <form onsubmit="handleConfirmEditMovie(event)">
+                <input type="hidden" id="edit-movie-id">
+                <div class="form-group">
+                    <label>Киноны нэр</label>
+                    <input type="text" id="edit-movie-title" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Постер зургийн холбоос (URL)</label>
+                    <input type="url" id="edit-movie-poster" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Bunny.net Embed Video URL</label>
+                    <input type="url" id="edit-movie-url" class="form-control" required>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div class="form-group">
+                        <label>Үргэлжлэх хугацаа</label>
+                        <input type="text" id="edit-movie-duration" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Төрөл / Ангилал</label>
+                        <input type="text" id="edit-movie-category" class="form-control" required>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button type="button" class="btn-outline" style="flex: 1;" onclick="closeEditMovieModal()">Болих</button>
+                    <button type="submit" class="btn-primary" style="flex: 1;">Хадгалах</button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -795,6 +857,7 @@
                 adminView.style.display = 'block';
                 updateTokenStatusUI();
                 renderAdminMovieSelections();
+                renderAdminMoviesList();
                 renderPasses();
             } else {
                 adminView.style.display = 'none';
@@ -927,7 +990,12 @@
                             const dLeft = Math.ceil((new Date(acc.expiresAt) - new Date()) / (1000 * 60 * 60 * 24));
                             info = dLeft > 0 ? `${dLeft}х үлдсэн` : 'дууссан';
                         }
-                        moviesHtml += `<span class="tag-pill">🎬 ${mTitle}: <b>${info}</b></span>`;
+                        moviesHtml += `
+                            <span class="tag-pill" style="display:inline-flex; align-items:center; gap:4px; margin:2px;">
+                                🎬 ${mTitle}: <b>${info}</b>
+                                <span style="cursor:pointer; color:#F87171; font-weight:bold; margin-left:4px; padding:0 3px;" title="Энэ киноны эрхийг хасах" onclick="removeMovieFromPass(${p.id}, '${mId}')">✕</span>
+                            </span>
+                        `;
                     });
                 }
 
@@ -957,10 +1025,34 @@
                         <button class="btn-outline" style="padding:3px 8px; font-size:0.75rem; margin-left:4px;" onclick="togglePass(${p.id})">
                             ${p.isActive ? 'Хаах' : 'Нээх'}
                         </button>
+                        <button class="btn-outline" style="padding:3px 8px; font-size:0.75rem; color:#F87171; border-color:#EF4444; margin-left:4px;" title="Хэрэглэгчийг устгах" onclick="deletePass(${p.id})">🗑️</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
+        }
+
+        async function removeMovieFromPass(passId, movieId) {
+            const p = appData.passes.find(x => x.id === passId);
+            if (!p || !p.access || !p.access[movieId]) return;
+            const m = appData.movies.find(x => x.id === movieId);
+            const mTitle = m ? m.title : movieId;
+            if (!confirm(`"${p.note}" хэрэглэгчийн "${mTitle}" киног үзэх эрхийг хасах уу?`)) return;
+
+            delete p.access[movieId];
+            await saveData();
+            renderPasses();
+            alert(`"${mTitle}" кино амжилттай хасагдлаа!`);
+        }
+
+        async function deletePass(id) {
+            const p = appData.passes.find(x => x.id === id);
+            if (!p) return;
+            if (!confirm(`"${p.note}" хэрэглэгчийн бүртгэлийг бүрмөсөн устгах уу?`)) return;
+
+            appData.passes = appData.passes.filter(x => x.id !== id);
+            await saveData();
+            renderPasses();
         }
 
         function copyLink(link) {
@@ -1058,7 +1150,91 @@
             document.getElementById('new-movie-url').value = '';
             alert('Шинэ кино санд амжилттай нэмэгдлээ!');
             renderAdminMovieSelections();
-            toggleAdminView();
+            renderAdminMoviesList();
+            renderMovies();
+        }
+
+        // АДМИН: САНД БАЙГАА КИНОНУУДЫГ ХАРУУЛАХ
+        function renderAdminMoviesList() {
+            const tbody = document.getElementById('admin-movies-tbody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            const countEl = document.getElementById('admin-movie-count');
+            if (countEl) countEl.innerText = `Нийт: ${appData.movies.length} кино`;
+
+            if (appData.movies.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-sub); padding:20px;">Санд одоогоор кино байхгүй байна.</td></tr>`;
+                return;
+            }
+
+            appData.movies.forEach(m => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>
+                        <img src="${m.poster_url}" style="width:40px; height:56px; object-fit:cover; border-radius:4px;" onerror="this.src='https://via.placeholder.com/40x56?text=Кино'">
+                    </td>
+                    <td><strong>${m.title}</strong></td>
+                    <td><small>${m.category || 'Анимэ'} / ${m.duration || 'Full HD'}</small></td>
+                    <td>
+                        <input type="text" class="form-control" style="padding:3px 6px; font-size:0.7rem; width:170px;" value="${m.video_url}" readonly>
+                    </td>
+                    <td>
+                        <button class="btn-outline" style="padding:3px 8px; font-size:0.75rem; margin-right:4px;" onclick="openEditMovieModal('${m.id}')">✏️ Засах</button>
+                        <button class="btn-outline" style="padding:3px 8px; font-size:0.75rem; color:#F87171; border-color:#EF4444;" onclick="deleteMovieFromCatalog('${m.id}')">🗑️</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function openEditMovieModal(movieId) {
+            const m = appData.movies.find(x => x.id === movieId);
+            if (!m) return;
+            document.getElementById('edit-movie-id').value = m.id;
+            document.getElementById('edit-movie-title').value = m.title;
+            document.getElementById('edit-movie-poster').value = m.poster_url;
+            document.getElementById('edit-movie-url').value = m.video_url;
+            document.getElementById('edit-movie-duration').value = m.duration || '2ц 34м';
+            document.getElementById('edit-movie-category').value = m.category || 'Анимэ (Монгол орчуулга)';
+            document.getElementById('edit-movie-modal').style.display = 'flex';
+        }
+
+        function closeEditMovieModal() {
+            document.getElementById('edit-movie-modal').style.display = 'none';
+        }
+
+        async function handleConfirmEditMovie(e) {
+            e.preventDefault();
+            const mId = document.getElementById('edit-movie-id').value;
+            const m = appData.movies.find(x => x.id === mId);
+            if (!m) return;
+
+            m.title = document.getElementById('edit-movie-title').value.trim();
+            m.poster_url = document.getElementById('edit-movie-poster').value.trim();
+            m.video_url = document.getElementById('edit-movie-url').value.trim();
+            m.duration = document.getElementById('edit-movie-duration').value.trim();
+            m.category = document.getElementById('edit-movie-category').value.trim();
+
+            await saveData();
+            closeEditMovieModal();
+            renderAdminMoviesList();
+            renderAdminMovieSelections();
+            renderMovies();
+            alert('Киноны нэр, постер амжилттай шинэчлэгдлээ!');
+        }
+
+        async function deleteMovieFromCatalog(movieId) {
+            const m = appData.movies.find(x => x.id === movieId);
+            if (!m) return;
+            if (!confirm(`"${m.title}" киног сангаас бүрмөсөн устгах уу?`)) return;
+
+            appData.movies = appData.movies.filter(x => x.id !== movieId);
+            await saveData();
+            renderAdminMoviesList();
+            renderAdminMovieSelections();
+            renderMovies();
+            alert('Кино сангаас хасагдлаа.');
+        }
         }
 
         initApp();
