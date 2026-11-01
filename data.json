@@ -22,13 +22,13 @@
       "id": 1793541117436,
       "key": "pass_y5cjtm3",
       "note": "Batdorj",
-      "lockedDeviceId": null,
-      "deviceInfo": null,
+      "lockedDeviceId": "DEV-hztqh3tg-mvxqgiim",
+      "deviceInfo": "iPhone",
       "isActive": true,
       "access": {
         "movie_1793539149178": {
           "days": 30,
-          "expiresAt": null
+          "expiresAt": "2026-12-01T13:54:20.673Z"
         }
       }
     },
