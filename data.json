@@ -24,7 +24,7 @@
       "note": "Test",
       "lockedDeviceId": "DEV-hztqh3tg-mvxqgiim",
       "deviceInfo": "iPhone",
-      "isActive": true,
+      "isActive": false,
       "access": {
         "movie_1793539906531": {
           "days": 15,
